@@ -4,8 +4,9 @@ import { makeHoloMaterial } from '../world/Materials.js';
 
 /** Short-lived visual effects: shockwaves, light flashes, blade arcs, dash afterimages. */
 export class Effects {
-  constructor(scene) {
+  constructor(scene, particles) {
     this.scene = scene;
+    this.particles = particles;
 
     // --- shockwave rings ---
     this.rings = [];
@@ -79,6 +80,10 @@ export class Effects {
     this.muzzle.visible = false;
     scene.add(this.muzzle);
     this.muzzleT = 0;
+  }
+
+  burst(pos, opts) {
+    this.particles.burst(pos, opts);
   }
 
   ring(pos, color = '#22e6ff', radius = 4, dur = 0.5, facing = null) {
