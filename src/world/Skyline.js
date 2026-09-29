@@ -162,13 +162,15 @@ export class Traffic {
     const rng = makeRng(99);
     this.lanes = [];
     const lanes = [
-      { r: 95, y: 22, speed: 0.05, n: 34, color: 0xfff1d6 },
-      { r: 100, y: 26, speed: -0.045, n: 30, color: 0xff3350 },
+      { r: 78, y: -14, speed: 0.06, n: 30, color: 0xfff1d6 },
+      { r: 84, y: -18, speed: -0.055, n: 30, color: 0xff3350 },
+      { r: 110, y: -6, speed: 0.045, n: 40, color: 0x7ff6ff },
+      { r: 118, y: -30, speed: -0.04, n: 44, color: 0xff4fd8 },
       { r: 150, y: 8, speed: 0.035, n: 44, color: 0xfff1d6 },
-      { r: 158, y: 12, speed: -0.032, n: 44, color: 0xff3350 },
-      { r: 230, y: 40, speed: 0.022, n: 60, color: 0x7ff6ff },
-      { r: 240, y: 46, speed: -0.02, n: 60, color: 0xff4fd8 },
-      { r: 330, y: 70, speed: 0.016, n: 70, color: 0xfff1d6 },
+      { r: 158, y: -40, speed: -0.032, n: 44, color: 0xff3350 },
+      { r: 230, y: 30, speed: 0.022, n: 60, color: 0x7ff6ff },
+      { r: 240, y: -20, speed: -0.02, n: 60, color: 0xff4fd8 },
+      { r: 330, y: 50, speed: 0.016, n: 70, color: 0xfff1d6 },
       { r: 340, y: -10, speed: -0.015, n: 70, color: 0xff3350 },
     ];
     let total = 0;
@@ -209,7 +211,7 @@ export class Traffic {
       for (const c of l.cars) {
         const a = c.a + t * l.speed;
         const r = l.r + c.dr;
-        this._p.set(Math.cos(a) * r, l.y + c.dy + Math.sin(t * 0.5 + c.wob) * 0.8, Math.sin(a) * r - 20);
+        this._p.set(Math.cos(a) * r, l.y + c.dy + Math.sin(t * 0.5 + c.wob) * 0.8, Math.sin(a) * r);
         this._e.set(0, -a + (l.speed > 0 ? Math.PI : 0), 0);
         this._q.setFromEuler(this._e);
         this._m.compose(this._p, this._q, this._s);
@@ -354,9 +356,10 @@ export class HoloWhale {
   }
 
   update(t) {
-    const a = t * 0.028;
-    const R = 125;
-    this.group.position.set(Math.cos(a) * R, 38 + Math.sin(t * 0.13) * 6, Math.sin(a) * R - 20);
+    const o = this.orbit || (this.orbit = { R: 125, y: 38, speed: 0.028, cz: -20 });
+    const a = t * o.speed;
+    const R = o.R;
+    this.group.position.set(Math.cos(a) * R, o.y + Math.sin(t * 0.13) * 6, Math.sin(a) * R + o.cz);
     this.group.rotation.y = -a; // nose (+Z) along the direction of travel
     this.group.rotation.z = Math.sin(t * 0.2) * 0.08;
     const sw = t * 0.9;
@@ -532,6 +535,11 @@ export class CityCore {
     this.awake = 0.15;
     this.awakeTarget = 0.15;
     this.pulse = 0;
+  }
+
+  setPosition(x, y, z) {
+    this.pos.set(x, y, z);
+    this.group.position.copy(this.pos);
   }
 
   setAwake(v) {

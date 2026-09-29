@@ -11,7 +11,7 @@ import { PostFX } from '../fx/PostFX.js';
 import { Player } from '../player/Player.js';
 import { CameraRig } from './CameraRig.js';
 import { Input } from './Input.js';
-import { Projectiles } from '../combat/Projectiles.js';
+import { Projectiles } from '../combat/LegacyProjectiles.js'; // legacy exploration build — replaced by the survivor rewrite
 import { EnemyManager } from '../enemies/Enemies.js';
 import { Echoes } from '../systems/Echoes.js';
 import { Pickups } from '../systems/Pickups.js';
