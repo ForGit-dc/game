@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEON//ECHO</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23070512'/%3E%3Cpath d='M16 3 L28 16 L16 29 L4 16Z' fill='none' stroke='%2322e6ff' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23ff2bd6'/%3E%3C/svg%3E"
+    />
+    <meta name="theme-color" content="#070512" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="game" tabindex="0"></canvas>
+
+      <div id="ui">
+        <!-- world-space markers & floating numbers -->
+        <div id="markers"></div>
+        <div id="dmgnums"></div>
+
+        <!-- ============ HUD ============ -->
+        <div id="hud" class="hidden">
+          <div class="hud-tl">
+            <div class="objective panel">
+              <div class="obj-label"><span class="obj-dot"></span>OBJECTIVE</div>
+              <div class="obj-text" id="obj-text">Recover Echo fragments</div>
+              <div class="obj-sub" id="obj-sub"></div>
+            </div>
+            <div class="log" id="log"></div>
+          </div>
+
+          <div class="hud-tr">
+            <div class="echo-row" id="echo-row"></div>
+            <div class="stat-row">
+              <span class="lbl">THREAT</span>
+              <div class="danger" id="danger"><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+            <div class="stat-row">
+              <span class="lbl">CORE FAILURE</span>
+              <span class="core-val" id="core-val">61.0%</span>
+            </div>
+            <div class="stat-row score-row">
+              <span class="lbl">SCORE</span>
+              <span class="score-val" id="score-val">000000</span>
+            </div>
+          </div>
+
+          <div class="hud-tc hidden" id="timer-wrap">
+            <div class="timer-lbl">CITY COLLAPSE IN</div>
+            <div class="timer" id="timer">02:00.00</div>
+          </div>
+
+          <div class="hud-bl">
+            <div class="unit-id">K-7 <span>//</span> COURIER CLASS</div>
+            <div class="bar hp">
+              <div class="bar-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z" /></svg>
+              </div>
+              <div class="bar-track">
+                <div class="bar-ghost" id="hp-ghost"></div>
+                <div class="bar-fill" id="hp-fill"></div>
+              </div>
+              <span class="bar-val" id="hp-val">100</span>
+            </div>
+            <div class="bar en">
+              <div class="bar-icon">
+                <svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" /></svg>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" id="en-fill"></div>
+              </div>
+              <span class="bar-val" id="en-val">100</span>
+            </div>
+          </div>
+
+          <div class="hud-bc">
+            <div class="ability" id="ab-dash">
+              <div class="ab-cd"></div>
+              <svg viewBox="0 0 24 24"><path d="M3 12h9M6 7h8M6 17h8M14 5l7 7-7 7" /></svg>
+              <div class="ab-key">SHIFT</div>
+              <div class="ab-name">DASH</div>
+              <div class="ab-pips" id="dash-pips"></div>
+            </div>
+            <div class="ability" id="ab-blade">
+              <div class="ab-cd"></div>
+              <svg viewBox="0 0 24 24"><path d="M4 20 18 6l2-3-3 2L4 19zM7 14l3 3" /></svg>
+              <div class="ab-key">RMB / F</div>
+              <div class="ab-name">BLADE</div>
+            </div>
+            <div class="ability ultimate" id="ab-over">
+              <div class="ab-cd"></div>
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" /><path d="M12 13V8M12 13l3 2M9 2h6" /></svg>
+              <div class="ab-key">Q</div>
+              <div class="ab-name">OVERCLOCK</div>
+            </div>
+          </div>
+
+          <div id="crosshair">
+            <i class="ch-t"></i><i class="ch-b"></i><i class="ch-l"></i><i class="ch-r"></i>
+            <b class="ch-dot"></b>
+          </div>
+          <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
+          <div id="dmg-dir"></div>
+
+          <div id="banner">
+            <div class="banner-kicker" id="banner-kicker"></div>
+            <div class="banner-main" id="banner-main" data-text=""></div>
+            <div class="banner-sub" id="banner-sub"></div>
+          </div>
+
+          <div id="uplink" class="hidden">
+            <svg viewBox="0 0 120 120">
+              <circle class="ul-bg" cx="60" cy="60" r="52" />
+              <circle class="ul-fg" id="ul-ring" cx="60" cy="60" r="52" />
+            </svg>
+            <div class="ul-txt"><span id="ul-pct">0</span><small>UPLINK</small></div>
+          </div>
+
+          <div id="prompt"></div>
+          <div id="lock-hint" class="hidden">CLICK TO SYNC NEURAL LINK</div>
+        </div>
+
+        <!-- ============ BOOT ============ -->
+        <div id="boot" class="screen">
+          <div class="boot-inner">
+            <div class="boot-lines" id="boot-lines"></div>
+            <button class="boot-btn" id="boot-btn" disabled>
+              <span>INITIALIZING</span>
+            </button>
+            <div class="boot-note">best with headphones · mouse + keyboard</div>
+          </div>
+        </div>
+
+        <!-- ============ MAIN MENU ============ -->
+        <div id="menu" class="screen hidden">
+          <div class="menu-left">
+            <div class="menu-kicker">SIGNAL 7 // FLOATING DISTRICT OF VASHTA</div>
+            <h1 class="title glitch" data-text="NEON//ECHO">NEON<span>//</span>ECHO</h1>
+            <div class="tagline">A courier wakes in a falling city.</div>
+            <nav class="menu-nav">
+              <button class="mbtn" data-action="play"><span class="idx">01</span>PLAY</button>
+              <button class="mbtn" data-action="controls"><span class="idx">02</span>CONTROLS</button>
+              <button class="mbtn" data-action="credits"><span class="idx">03</span>CREDITS</button>
+            </nav>
+            <div class="menu-foot">BUILD 1.0 // UNIT K-7 // <span id="best-score">NO RECORD</span></div>
+          </div>
+
+          <div class="menu-panel panel hidden" id="panel-controls">
+            <div class="panel-head">CONTROLS</div>
+            <div class="keys">
+              <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>Move</span></div>
+              <div><kbd>MOUSE</kbd><span>Camera / aim</span></div>
+              <div><kbd>SPACE</kbd><span>Jump · press again to double-jump</span></div>
+              <div><kbd>SHIFT</kbd><span>Tap: dash (invulnerable) · hold: sprint</span></div>
+              <div><kbd>LMB</kbd><span>Pulse blaster (hold)</span></div>
+              <div><kbd>RMB</kbd><kbd>F</kbd><span>Blade · deflects orange orbs</span></div>
+              <div><kbd>Q</kbd><span>Overclock · slows time when SYNC is full</span></div>
+              <div><kbd>ESC</kbd><kbd>P</kbd><span>Pause</span></div>
+            </div>
+            <div class="panel-tip">
+              Echoes grant augments. Recover 5 to open the Skylift.<br />
+              Cyan coolant pools recharge energy. Glowing pads launch you.
+            </div>
+            <button class="sbtn" data-action="back">BACK</button>
+          </div>
+
+          <div class="menu-panel panel hidden" id="panel-credits">
+            <div class="panel-head">CREDITS</div>
+            <div class="credits">
+              <p><b>Direction · Design · Code · Art · Audio</b><br />Claude, from a one-line brief: "surprise me"</p>
+              <p><b>Everything is procedural</b><br />Every mesh, texture and sound is generated at runtime. No asset files.</p>
+              <p><b>Built with</b><br />Three.js · Vite · Web Audio API</p>
+              <p><b>Typefaces</b><br />Chakra Petch & Share Tech Mono (SIL Open Font License)</p>
+            </div>
+            <button class="sbtn" data-action="back">BACK</button>
+          </div>
+        </div>
+
+        <!-- ============ AUGMENT CHOICE ============ -->
+        <div id="augment" class="screen hidden">
+          <div class="aug-head">
+            <div class="aug-kicker" id="aug-kicker">ECHO 01 INTEGRATED</div>
+            <div class="aug-title">SELECT AUGMENT</div>
+          </div>
+          <div class="aug-cards" id="aug-cards"></div>
+          <div class="aug-hint">MOVE MOUSE TO BROWSE · CLICK OR PRESS 1 / 2 / 3</div>
+        </div>
+
+        <!-- ============ PAUSE ============ -->
+        <div id="pause" class="screen hidden">
+          <div class="panel pause-panel">
+            <div class="panel-head">SYSTEM PAUSED</div>
+            <button class="sbtn" data-action="resume">RESUME</button>
+            <button class="sbtn" data-action="restart">RESTART RUN</button>
+            <button class="sbtn" data-action="quit">MAIN MENU</button>
+            <div class="settings">
+              <label>MOUSE SENSITIVITY <input type="range" id="set-sens" min="0.2" max="2.5" step="0.05" value="1" /></label>
+              <label>MASTER VOLUME <input type="range" id="set-vol" min="0" max="1" step="0.01" value="0.8" /></label>
+              <label class="chk"><input type="checkbox" id="set-invert" /> INVERT Y</label>
+            </div>
+            <div class="pause-help">
+              WASD move · SPACE jump · SHIFT dash/sprint · LMB fire · RMB/F blade · Q overclock
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ GAME OVER ============ -->
+        <div id="gameover" class="screen hidden">
+          <div class="end-inner">
+            <div class="end-kicker">CONNECTION TERMINATED</div>
+            <h2 class="end-title glitch red" data-text="SIGNAL LOST">SIGNAL LOST</h2>
+            <div class="end-reason" id="go-reason"></div>
+            <div class="end-stats" id="go-stats"></div>
+            <div class="end-btns">
+              <button class="sbtn" data-action="restart">REBOOT</button>
+              <button class="sbtn" data-action="quit">MAIN MENU</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ VICTORY ============ -->
+        <div id="victory" class="screen hidden">
+          <div class="end-inner">
+            <div class="end-kicker">UPLINK COMPLETE</div>
+            <h2 class="end-title glitch gold" data-text="DELIVERY COMPLETE">DELIVERY COMPLETE</h2>
+            <div class="end-reason" id="vic-reason">The package was you. You arrived.</div>
+            <div class="rank" id="vic-rank">A</div>
+            <div class="end-stats" id="vic-stats"></div>
+            <div class="end-btns">
+              <button class="sbtn" data-action="restart">RUN AGAIN</button>
+              <button class="sbtn" data-action="quit">MAIN MENU</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="fade"></div>
+        <div id="scan"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

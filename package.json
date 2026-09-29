@@ -1,0 +1,20 @@
+{
+  "name": "neon-echo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "NEON//ECHO — a small third-person cyberpunk action game built with Three.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --open",
+    "build": "vite build",
+    "preview": "vite preview --open"
+  },
+  "dependencies": {
+    "@fontsource/chakra-petch": "^5.2.0",
+    "@fontsource/share-tech-mono": "^5.2.0",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "vite": "^8.0.0"
+  }
+}
