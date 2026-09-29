@@ -21,13 +21,14 @@ import { AudioEngine } from '../audio/Audio.js';
 import { UI } from '../ui/UI.js';
 import { clamp, damp, rand } from '../utils/math.js';
 
-const SPAWN = new THREE.Vector3(0, 0, 6.5);
+const SPAWN = new THREE.Vector3(0, 0, 4);
 const FOG = 0x0f0820;
 
 export class Game {
-  constructor(canvas, { debug = false } = {}) {
+  constructor(canvas, { debug = false, lowQuality = false } = {}) {
     this.canvas = canvas;
     this.debug = debug;
+    this.lowQuality = lowQuality;
     this.state = 'boot';
     this.time = 0;
     this.score = 0;
@@ -53,13 +54,13 @@ export class Game {
   async init(progress = () => {}) {
     const canvas = this.canvas;
     const renderer = (this.renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance', stencil: false }));
-    this.maxPixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+    this.maxPixelRatio = this.lowQuality ? 0.5 : Math.min(window.devicePixelRatio || 1, 1.25);
     this.pixelRatio = this.maxPixelRatio;
     renderer.setPixelRatio(this.pixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight, false);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
-    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.enabled = !this.lowQuality;
     renderer.shadowMap.type = THREE.PCFShadowMap;
 
     const scene = (this.scene = new THREE.Scene());
@@ -121,7 +122,7 @@ export class Game {
     this.ui.initMarkers(this.echoes, this.level.skyport);
     this.ui.setEchoPips(this.echoes.items.length, REQUIRED_ECHOES, 0);
     this.ui.setBest(this.best);
-    this.postfx = new PostFX(renderer, scene, camera);
+    this.postfx = new PostFX(renderer, scene, camera, { samples: this.lowQuality || this.maxPixelRatio > 1.1 ? 0 : 4 });
     this.onResize();
     window.addEventListener('resize', () => this.onResize());
 
@@ -352,7 +353,7 @@ export class Game {
 
   loop() {
     const now = performance.now();
-    const rawDt = Math.min(0.05, (now - this.last) / 1000);
+    const rawDt = this._fixedDt ?? Math.min(0.05, (now - this.last) / 1000);
     this.last = now;
     this.frame++;
     this.aimCache = null;
@@ -436,8 +437,24 @@ export class Game {
     U.uLowHealth.value = st === 'playing' && p.hp / p.stats.maxHp < 0.3 ? 1 : 0;
 
     this.ui.updateWorld(rawDt, this.camera, this.w, this.h);
-    this.postfx.render(rawDt);
+    if (!this._noRender) this.postfx.render(rawDt);
     this.input.endFrame();
+  }
+
+  /** Debug/automation: advance the simulation deterministically (used by headless tests). */
+  debugStep(frames = 60, dt = 1 / 60) {
+    this.renderer.setAnimationLoop(null);
+    this._fixedDt = dt;
+    this._noRender = true;
+    for (let i = 0; i < frames; i++) this.loop();
+    this._noRender = false;
+    this.loop();
+  }
+
+  debugResume() {
+    this._fixedDt = null;
+    this.last = performance.now();
+    this.renderer.setAnimationLoop(() => this.loop());
   }
 
   updateMenu(dt) {

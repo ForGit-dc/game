@@ -403,7 +403,7 @@ export class Level {
     this.batch.add(G.box, this.mats.glow(C.CYAN, 4), 0, 0.2, 10.3, 0, 0, 0, 1.2, 0.06, 0.06);
     // open pod door lying on the floor
     this.batch.add(G.round, this.mats.white, 1.8, 0.12, 9.6, 0, 0.4, 0, 1.4, 0.2, 2.2);
-    this.anchors.push({ pos: new THREE.Vector3(0, 0, 6), always: true });
+    this.anchors.push({ pos: new THREE.Vector3(0, 0, 4), always: true });
 
     // corner towers framing the plaza
     this.building({ x: -13, z: -13, base: 0, w: 7, d: 7, h: 22, variant: 1, trim: C.MAGENTA });

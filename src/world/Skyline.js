@@ -430,8 +430,12 @@ export class CityCore {
           float pupilR = mix(0.975, 0.955, uAlarm);
           if (d > irisR) {
             float k = smoothstep(irisR, irisR + 0.012, d);
-            vec3 side = normalize(p - uLook * d);
-            float ang = atan(dot(side, normalize(cross(uLook, vec3(0.0, 1.0, 0.0)))), dot(side, vec3(0.0, 1.0, 0.0)));
+            vec3 sideRaw = p - uLook * d;
+            float sl = length(sideRaw);
+            vec3 side = sl > 1e-4 ? sideRaw / sl : vec3(0.0, 1.0, 0.0);
+            vec3 ax = cross(uLook, vec3(0.0, 1.0, 0.0));
+            ax = length(ax) > 1e-4 ? normalize(ax) : vec3(1.0, 0.0, 0.0);
+            float ang = atan(dot(side, ax), dot(side, vec3(0.0, 1.0, 0.0)) + 1e-5);
             float stri = 0.5 + 0.5 * sin(ang * 40.0 + noise(p * 20.0) * 6.0);
             float ringT = smoothstep(irisR, 1.0, d);
             vec3 ic = mix(vec3(0.1, 0.9, 1.0), vec3(1.0, 0.08, 0.12), uAlarm);

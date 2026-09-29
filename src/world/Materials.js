@@ -285,7 +285,7 @@ export function makePadMaterial(color) {
         float rings = smoothstep(0.75, 1.0, fract(r * 3.0 - uTime * speed));
         float rim = smoothstep(0.86, 0.95, r) * (1.0 - smoothstep(0.95, 1.0, r));
         float core = 1.0 - smoothstep(0.0, 0.35, r);
-        float ang = atan(p.y, p.x);
+        float ang = atan(p.y, p.x + 1e-5);
         float ticks = step(0.9, fract(ang * 3.8197)) * step(0.62, r) * step(r, 0.8);
         vec3 c = mix(vec3(1.0, 0.15, 0.2), uColor, uActive);
         float i = rings * 1.4 + rim * 2.5 + core * 0.6 * uActive + ticks * 1.2 + uKick * 3.0;

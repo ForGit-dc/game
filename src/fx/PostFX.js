@@ -92,14 +92,34 @@ const FinalShader = {
   `,
 };
 
+/** Replaces NaN/Inf and absurd HDR values: one bad pixel must never black out the frame through bloom. */
+const SanitizeShader = {
+  uniforms: { tDiffuse: { value: null } },
+  vertexShader: /* glsl */ `
+    varying vec2 vUv;
+    void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+  `,
+  fragmentShader: /* glsl */ `
+    uniform sampler2D tDiffuse;
+    varying vec2 vUv;
+    float fix(float v) { return (v >= 0.0 && v < 60.0) ? v : (v >= 60.0 ? 60.0 : 0.0); }
+    void main() {
+      vec4 c = texture2D(tDiffuse, vUv);
+      if (any(isnan(c)) || any(isinf(c))) c = vec4(0.0, 0.0, 0.0, 1.0);
+      gl_FragColor = vec4(fix(c.r), fix(c.g), fix(c.b), 1.0);
+    }
+  `,
+};
+
 export class PostFX {
-  constructor(renderer, scene, camera) {
+  constructor(renderer, scene, camera, { samples = 4 } = {}) {
     this.renderer = renderer;
     const size = renderer.getDrawingBufferSize(new THREE.Vector2());
-    const rt = new THREE.WebGLRenderTarget(size.x, size.y, { type: THREE.HalfFloatType, samples: 4 });
+    const rt = new THREE.WebGLRenderTarget(size.x, size.y, { type: THREE.HalfFloatType, samples });
     this.composer = new EffectComposer(renderer, rt);
     this.renderPass = new RenderPass(scene, camera);
     this.composer.addPass(this.renderPass);
+    this.composer.addPass(new ShaderPass(SanitizeShader));
     this.bloom = new UnrealBloomPass(new THREE.Vector2(size.x / 2, size.y / 2), 0.95, 0.55, 0.78);
     this.composer.addPass(this.bloom);
     this.final = new ShaderPass(FinalShader);

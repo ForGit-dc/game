@@ -55,7 +55,7 @@ export class Sky {
           col = mix(col, zen, smoothstep(0.2, 0.85, h));
 
           // warm glow from burning districts far below (north-east)
-          float warm = pow(max(0.0, dot(normalize(vec3(d.x, 0.0, d.z)), normalize(vec3(0.6, 0.0, -0.8)))), 6.0);
+          float warm = pow(max(0.0, dot(normalize(vec3(d.x, 0.0, d.z) + vec3(1e-4, 0.0, 0.0)), normalize(vec3(0.6, 0.0, -0.8)))), 6.0);
           col += vec3(1.0, 0.35, 0.08) * warm * 0.35 * (1.0 - smoothstep(0.0, 0.25, h));
 
           // below horizon: city glow through the cloud sea
