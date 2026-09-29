@@ -91,7 +91,7 @@
             <div class="ability ultimate" id="ab-over">
               <div class="ab-cd"></div>
               <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" /><path d="M12 13V8M12 13l3 2M9 2h6" /></svg>
-              <div class="ab-key">Q</div>
+              <div class="ab-key" data-keylabel="KeyQ">Q</div>
               <div class="ab-name">OVERCLOCK</div>
             </div>
           </div>
@@ -149,14 +149,14 @@
           <div class="menu-panel panel hidden" id="panel-controls">
             <div class="panel-head">CONTROLS</div>
             <div class="keys">
-              <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>Move</span></div>
+              <div><kbd data-code="KeyW">W</kbd><kbd data-code="KeyA">A</kbd><kbd data-code="KeyS">S</kbd><kbd data-code="KeyD">D</kbd><span>Move</span></div>
               <div><kbd>MOUSE</kbd><span>Camera / aim</span></div>
               <div><kbd>SPACE</kbd><span>Jump · press again to double-jump</span></div>
               <div><kbd>SHIFT</kbd><span>Tap: dash (invulnerable) · hold: sprint</span></div>
               <div><kbd>LMB</kbd><span>Pulse blaster (hold)</span></div>
-              <div><kbd>RMB</kbd><kbd>F</kbd><span>Blade · deflects orange orbs</span></div>
-              <div><kbd>Q</kbd><span>Overclock · slows time when SYNC is full</span></div>
-              <div><kbd>ESC</kbd><kbd>P</kbd><span>Pause</span></div>
+              <div><kbd>RMB</kbd><kbd data-code="KeyF">F</kbd><span>Blade · deflects orange orbs</span></div>
+              <div><kbd data-code="KeyQ">Q</kbd><span>Overclock · slows time when SYNC is full</span></div>
+              <div><kbd>ESC</kbd><kbd data-code="KeyP">P</kbd><span>Pause</span></div>
             </div>
             <div class="panel-tip">
               Echoes grant augments. Recover 5 to open the Skylift.<br />
@@ -200,7 +200,7 @@
               <label class="chk"><input type="checkbox" id="set-invert" /> INVERT Y</label>
             </div>
             <div class="pause-help">
-              WASD move · SPACE jump · SHIFT dash/sprint · LMB fire · RMB/F blade · Q overclock
+              <span data-keylabel="KeyW">W</span><span data-keylabel="KeyA">A</span><span data-keylabel="KeyS">S</span><span data-keylabel="KeyD">D</span> move · SPACE jump · SHIFT dash/sprint · LMB fire · RMB/F blade · <span data-keylabel="KeyQ">Q</span> overclock
             </div>
           </div>
         </div>

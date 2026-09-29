@@ -71,6 +71,8 @@ export class Player {
     this.dashCharges = this.stats.dashCharges;
     this.dashRecharge = 0;
     this.dashHit = new Set();
+    this.lungeT = 0;
+    this.lungeVel = new THREE.Vector3();
     this.invuln = 0;
     this.launched = false;
     this.fireCd = 0;
@@ -167,8 +169,16 @@ export class Player {
     this.sprinting = shift && hasInput && this.dashT <= 0;
 
     // ---------------------------------------------------------------- horizontal movement
+    const lunging = this.lungeT > 0 && this.dashT <= 0;
+    if (lunging) {
+      this.lungeT -= dt;
+      this.vel.copy(this.lungeVel);
+      if (this.lungeT <= 0) this.vel.multiplyScalar(0.35);
+    }
     const moving = this.dashT > 0;
-    if (moving) {
+    if (lunging) {
+      // velocity already set
+    } else if (moving) {
       this.dashT -= dt;
       const sp = 29;
       this.vel.x = this.dashDir.x * sp;
@@ -222,7 +232,7 @@ export class Player {
     }
 
     // ---------------------------------------------------------------- gravity
-    if (!moving) {
+    if (!moving && !lunging) {
       let gmul = 1;
       if (!this.launched) {
         if (this.vel.y < 0) gmul = 1.45;
@@ -398,6 +408,14 @@ export class Player {
     this._back.x += -Math.sin(this.facing) * 1.5;
     this._back.z += -Math.cos(this.facing) * 1.5;
     this.scarf.update(dt, this._anchor, this._back, g.time);
+  }
+
+  /** Blade lunge: short burst toward a target, gravity suspended. */
+  lunge(dir, speed = 20, time = 0.13) {
+    this.lungeVel.copy(dir).multiplyScalar(speed);
+    this.lungeT = time;
+    this.launched = false;
+    this.facing = Math.atan2(dir.x, dir.z);
   }
 
   launch(pad) {
