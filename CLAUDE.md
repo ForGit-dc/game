@@ -17,37 +17,17 @@ Read it fully before touching code.
 
 ## Current status (read this!)
 
-The project went through two designs:
+**v2 — 3D neon roguelite horde-survival — is DONE and playable** (branch `neon-echo`, pushed). v1 (exploration game) was removed.
+Verified headless: full loop (drop-in → waves → level-up cards → Hive Mother → ring collapse → Warden phases/Core Lance → victory → endless → death → shards → Lattice buy), all 6 weapons + evolutions, chests/rerolls, meteors, blackout, revive, overdrive. ~5 ms/frame JS with 350 drones.
 
-1. **v1 — third-person exploration game (DONE, playable, currently what `npm run dev` runs).**
-   Explore a floating city, collect 5/7 Echo fragments, augments, drones, city collapse, uplink at Skyport, victory.
-   Files: `src/game/Game.js`, `src/game/CameraRig.js`, `src/player/Player.js`, `src/enemies/Enemies.js`,
-   `src/systems/{Echoes,Director,Upgrades,Pickups}.js`, `src/combat/LegacyProjectiles.js`, `src/world/Level.js` (`build()` = the city).
-   The user judged it "fun for 5 min then boring" → asked for a **radical change**.
+Files (all live): `game/{Game,TopCamera,Input}.js`, `player/{Player,PlayerModel}.js`, `enemies/{Horde,Bosses}.js`, `combat/{Projectiles,Weapons}.js`, `systems/{Progression,Loot,Waves,Meta}.js`, `world/{Arena,Level,Sky,Skyline,Weather,Materials,Textures}.js`, `fx/*`, `audio/Audio.js`, `ui/UI.js`.
+`Level.build()` still contains the old v1 city layout (dead code; Arena overrides `build()` and only uses the kit methods) — safe to strip.
 
-2. **v2 — REWRITE IN PROGRESS: 3D neon roguelite horde-survival ("Vampire Survivors meets Hades", twin-stick, skill-based).**
-   Already written for v2 (new, NOT yet wired into Game, untested):
-   - `src/world/Arena.js` — `class Arena extends Level` (reuses the city kit). Circular floating arena, 3 rings (radii 16/27/38), segments that warn (orange blink) then fall, shrinking force-field barrier, circuit-glow floor shader, 9 pillars (circle obstacles), towers/signs/holos/cables around (tall to the north, low to the south so they never block the camera). API: `updateArena(dt, t, playerPos, events)`, `collapseRing(stage, warnTime)`, `constrain(pos, radius)`, `hitsObstacle(ax,az,bx,bz,r)` → t or -1, `pulse(radius)`, `reset()`, fields `boundary`, `obstacles`, `solidStage`, `stage`.
-   - `src/enemies/Horde.js` — instanced enemies + spatial hash grid. Types: wisp, shard (telegraphed charge), sentinel (ranged orbs), bulwark (front shield −85%), splitter (→3 mini wisps), bomber (arms & explodes, chain reactions). Elites (×5 hp, gold). Floor glow decals, charge telegraphs. API: `spawn(type,x,z,{elite,mini,rise,hpMul})`, `update(dt)`, `render(t)`, `forEachNear(x,z,r,fn)`, `nearest`, `randomNear`, `damage(e,dmg,dirX,dirZ,knock,opts)`, `kill`, `clear`. Expects `game.player.hurt(dmg, fromX, fromZ)`, `game.waves.hpMul`, `game.onEnemyKilled(e,cause)`, `game.onBomberExplode(x,z,R)`, `game.projectiles.enemyOrb(...)`, `game.arena`, optional `game.audio.shardAim/scoutLunge/sentinelFire/bomberArm`.
-   - `src/enemies/Bosses.js` — `HiveMother` (3:00: wisp swarms, rotating laser beams, orb rings), `Lancer` (6:30: telegraphed dashes leaving electric trails, fans, summons shards), `Warden` (10:00 final, 3 phases: fans / gap-nova rings / summons → phase 2 "Core Lance" sky beam on the player's position → phase 3 spiral bullet-hell). Base `Boss`: `damage(dmg)`, `update(dt)`, `invulnerable` during 3.2s rise-from-abyss intro, `dispose()`. Expects `game.onBossDying/onBossKilled/onBossSpark/onWardenPhase(2|2.5|3)/onCoreLanceAim/onCoreLanceStrike`, `game.horde`, `game.projectiles`, `game.arena`, `game.player.hurt`, `game.waves.hpMul`, `game.rig?.addTrauma`.
-   - `src/combat/Projectiles.js` — v2 API: `bolt(x,z,dx,dz,{dmg,speed,pierce,crit,color,size,life,shield})`, `enemyOrb(x,z,vx,vz,{dmg,owner,size,homing,life})`, `missile(x,z,dx,dz,target,{dmg,splash,split,speed})`, `ray(...)` (visual hitscan), `zap(points,color)` (visual lightning), `deflect(ox,oz,fx,fz,range,arcCos)`, `update(dt, worldScale, playerScale)`, `render(t)`. Expects `game.hitEnemy(e,dmg,dx,dz,knock,opts)`, `game.hitBoss(boss,dmg,crit,x,z)`, `game.areaDamage(x,z,r,dmg,opts)`, `game.nearestBoss(x,z)`, `game.bosses` (array), `player.hurt()` returning `true` (hit) / `'dodge'` / `false` / `'shielded'`.
-   - `src/world/Skyline.js` changes: whale orbit configurable via `whale.orbit = {R, y, speed, cz}` (plan: `{R:78, y:-22, speed:0.03, cz:0}` so it swims *below* the arena), traffic lanes lowered, `core.setPosition(x,y,z)` (plan: Eye rising from the abyss north of the arena, rises over the run; Core Lance comes from it).
+Audio: user said the first storm sounded "fake et agaçant" → rewritten as **pre-rendered buffers** (`_renderRain` droplet synthesis, `_renderThunder` rumble bank + near crack), thunder throttled (≥2.5 s apart) and lightning much rarer (14–36 s), ambience slider in pause (`localStorage neon-echo-amb`). If the user still dislikes it, lower/disable thunder first.
 
-   **Still TO WRITE for v2** (in this order), then delete v1-only files:
-   1. `src/combat/Weapons.js` (see design below)
-   2. `src/systems/Progression.js` (XP, level-ups, cards, evolutions, stat recompute)
-   3. `src/systems/Loot.js` (instanced XP shards + heart / magnet / chest)
-   4. `src/systems/Waves.js` (spawn director + event timeline, exposes `hpMul`, `t`, `nextEvent`)
-   5. `src/systems/Meta.js` (persistent shards + "Neural Lattice" upgrades in localStorage key `neon-echo-meta-v1`, wrap in try/catch)
-   6. `src/player/Player.js` rewrite (twin-stick, reuse `PlayerModel.js` + `Scarf`)
-   7. `src/game/TopCamera.js` (3/4 view camera + mouse-to-ground ray)
-   8. `src/game/Game.js` rewrite (flow, loop, all `on*`/`hit*` callbacks above)
-   9. `index.html` + `src/styles.css` + `src/ui/UI.js`: new HUD, level-up cards (reuse `.aug-card` styles), Lattice screen, pause (show build), end screens with shards earned
-   10. `src/audio/Audio.js`: add non-melodic SFX used by v2 (`levelUp`, `xpTick`, `bossWarn`, `bossCharge`, `laser`, `missileHit`, `bomberArm`, `shardAim`, `arcZap`, `nova`, `chest`, `meteor`), keep the storm
-   11. Delete v1-only files: `src/enemies/Enemies.js`, `src/systems/{Echoes,Director,Upgrades,Pickups}.js`, `src/game/CameraRig.js`, `src/combat/LegacyProjectiles.js`; strip the city layout out of `Level.build()` (keep the kit methods — Arena uses them).
-   12. Headless test the whole loop, screenshots, tune balance, update README.md, push.
+Possible next steps: real-GPU playtest feedback from the user, balance tuning (spawn rate in `Waves.update`, xp curve `xpToNext`), more enemy variety/bosses, stripping `Level.build()`, offering a PR `neon-echo → main`.
 
-## v2 game design (the plan to implement)
+## v2 game design (implemented)
 
 **Pitch:** K-7, a courier android, is trapped on *The Ring*, a floating arena above the drowned neon city of Vashta. Survive 10 minutes of escalating drone hordes, build a synergy loadout, kill three bosses, then keep going in Endless. Death is progress: shards buy permanent upgrades.
 
@@ -104,8 +84,8 @@ Also: horde surge every ~55s (ring of wisps closing on the player), an elite eve
 
 ## Testing (headless)
 
-- A Playwright + Chromium install lives **outside the repo** in the session scratchpad (`.../scratchpad/pw`, scripts `smoke.mjs`, `loop.mjs`, `dbg.mjs`). If missing: `npm init -y && npm i playwright && npx playwright install --with-deps chromium` in a scratch dir.
-- Launch flags: `--use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist`. Use `?debug&lowq`, viewport ~640×360–800×450.
+- A Playwright + Chromium install lives **outside the repo** in a scratchpad `pw/` dir (harness `h.mjs` + scripts `look.mjs`, `paths.mjs`, `boss.mjs`, `perf.mjs`, `audio.mjs`). Scratchpads get wiped between sessions: if missing, `npm init -y && npm i playwright` in a scratch dir (Chromium is cached in `~/.cache/ms-playwright`).
+- Launch flags: `--use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist`. Use `?debug&lowq` (or `?debug&pr=0.8&msaa=0` for nicer screenshots), viewport ~640×360–960×540.
 - Drive the game with `window.__game.debugStep(frames, dt)` (deterministic, no rAF) **in chunks of ≤10 frames per `page.evaluate`** — big chunks crash the renderer (first frames compile shaders for ~15s in SwiftShader). Simulate input by writing `game.input.down/pressed` and `game.input.mouse.*`.
 - Always check console errors/pageerrors, take screenshots and look at them. Run `npx vite build` before pushing.
 - Dev server: `npx vite --port 5173 --strictPort` (background).

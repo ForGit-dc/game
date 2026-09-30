@@ -1597,3 +1597,8 @@ body:not(.playing) #hud .hud-bc { opacity: 0.12; }
   #hud .hud-tl .slots { margin-top: 8px; }
   .ability { width: 56px; height: 56px; }
 }
+@media (max-width: 1100px) {
+  #hud .hud-tl { width: 250px; }
+  .hud-top { width: min(420px, 40vw); }
+  .hud-tr .val { min-width: 60px; }
+}
