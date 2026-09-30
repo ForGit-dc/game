@@ -39,7 +39,7 @@ The game is signed "A game by Anass El Basraoui" and reskinned with his ML world
 
 ## Deployment
 
-GitHub Pages via `.github/workflows/deploy.yml` (build + deploy on every push to `main`), `base: './'` in `vite.config.js`. URL: `https://forgit-dc.github.io/game/`. The user must enable Pages once (Settings → Pages → Source: GitHub Actions); the Codespace token cannot do it (403).
+GitHub Pages via `.github/workflows/deploy.yml` (build + deploy on every push to `main`), `base: './'` in `vite.config.js`. URL: `https://forgit-dc.github.io/game/`. Pages is enabled in **legacy "Deploy from a branch" mode** (the Codespace token gets 403 on the Pages API, so it cannot be switched from here). In that mode GitHub also publishes the raw source on every push, so the workflow's deploy job **waits for the `pages build and deployment` run to finish, then deploys the built `dist/` last**. Verified live (loads, menu shows, no errors). If the user switches Source to "GitHub Actions", the wait step simply finds nothing and proceeds. Note: user screenshots can be too large to read — check the live site with curl/Playwright instead.
 
 ## v2 game design (implemented)
 
