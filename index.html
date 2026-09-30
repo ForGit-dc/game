@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NEON//ECHO</title>
+    <title>NEON//ECHO — a game by Anass El Basraoui</title>
+    <meta name="author" content="Anass El Basraoui" />
+    <meta name="description" content="NEON//ECHO — a 3D neon roguelite where a machine-learning engineer survives everything that breaks a model in production. By Anass El Basraoui." />
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23070512'/%3E%3Cpath d='M16 3 L28 16 L16 29 L4 16Z' fill='none' stroke='%2322e6ff' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23ff2bd6'/%3E%3C/svg%3E"
@@ -34,7 +36,7 @@
           </div>
 
           <div class="hud-tl">
-            <div class="unit-id">K-7 <span>//</span> COURIER</div>
+            <div class="unit-id">ANASS <span>//</span> ML ENGINEER</div>
             <div class="bar hp">
               <div class="bar-icon"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z" /></svg></div>
               <div class="bar-track"><div class="bar-ghost" id="hp-ghost"></div><div class="bar-fill" id="hp-fill"></div></div>
@@ -105,17 +107,18 @@
         <!-- ============ MAIN MENU ============ -->
         <div id="menu" class="screen hidden">
           <div class="menu-left">
-            <div class="menu-kicker">THE RING // ABOVE THE DROWNED CITY OF VASHTA</div>
+            <div class="menu-kicker">A GAME BY ANASS EL BASRAOUI // DATA SCIENTIST &amp; ML ENGINEER</div>
             <h1 class="title glitch" data-text="NEON//ECHO">NEON<span>//</span>ECHO</h1>
-            <div class="tagline">Survive the fall. Ten minutes. Then the Warden wakes.</div>
+            <div class="tagline">Ship the model. Survive ten minutes. Then the Black Box wakes.</div>
             <nav class="menu-nav">
               <button class="mbtn" data-action="play"><span class="idx">01</span>PLAY</button>
               <button class="mbtn" data-action="lattice"><span class="idx">02</span>LATTICE <em id="menu-shards">◆ 0</em></button>
               <button class="mbtn" data-action="controls"><span class="idx">03</span>CONTROLS</button>
-              <button class="mbtn" data-action="credits"><span class="idx">04</span>CREDITS</button>
+              <button class="mbtn" data-action="author"><span class="idx">04</span>AUTHOR</button>
+              <button class="mbtn" data-action="credits"><span class="idx">05</span>CREDITS</button>
             </nav>
             <button class="diff hidden" id="diff-btn" data-action="difficulty">MODE · <b id="diff-label">NORMAL</b></button>
-            <div class="menu-foot" id="menu-foot">UNIT K-7 // NO RECORD</div>
+            <div class="menu-foot" id="menu-foot">OPERATOR ANASS // NO RECORD</div>
           </div>
 
           <div class="menu-panel panel hidden" id="panel-controls">
@@ -123,7 +126,7 @@
             <div class="keys">
               <div><kbd data-code="KeyW">W</kbd><kbd data-code="KeyA">A</kbd><kbd data-code="KeyS">S</kbd><kbd data-code="KeyD">D</kbd><span>Move</span></div>
               <div><kbd>MOUSE</kbd><span>Aim</span></div>
-              <div><kbd>LMB</kbd><span>Pulse Blaster (hold) · <kbd>T</kbd> toggles auto-fire</span></div>
+              <div><kbd>LMB</kbd><span>Python Pulse (hold) · <kbd>T</kbd> toggles auto-fire</span></div>
               <div><kbd>SPACE</kbd><kbd>SHIFT</kbd><span>Dash — invulnerable. Get hit mid-dash = Perfect Dodge</span></div>
               <div><kbd>RMB</kbd><kbd data-code="KeyF">F</kbd><span>Blade — cleaves, breaks shields, deflects orange orbs</span></div>
               <div><kbd data-code="KeyQ">Q</kbd><span>Overclock when SYNC is full — time slows, damage ×1.5</span></div>
@@ -140,10 +143,29 @@
           <div class="menu-panel panel hidden" id="panel-credits">
             <div class="panel-head">CREDITS</div>
             <div class="credits">
-              <p><b>Direction · Design · Code · Art · Sound</b><br />Claude, from a one-line brief: "surprise me"</p>
+              <p><b>A game by</b><br />Anass El Basraoui — Data Scientist &amp; ML Engineer</p>
+              <p><b>Direction · Design · Code · Art · Sound</b><br />Built with Claude Code, from a one-line brief: "surprise me"</p>
               <p><b>Everything is procedural</b><br />Every mesh, texture and sound is generated at runtime. No asset files. No music — only the storm.</p>
               <p><b>Built with</b><br />Three.js · Vite · Web Audio API</p>
               <p><b>Typefaces</b><br />Chakra Petch & Share Tech Mono (SIL Open Font License)</p>
+            </div>
+            <button class="sbtn" data-action="back">BACK</button>
+          </div>
+
+          <div class="menu-panel panel hidden" id="panel-author">
+            <div class="panel-head">AUTHOR</div>
+            <div class="author">
+              <div class="au-name">ANASS EL BASRAOUI</div>
+              <div class="au-role">Data Scientist &amp; ML Engineer · Rennes, France</div>
+              <p>Dual engineering degree <b>ENSAI</b> (Rennes) &amp; <b>INSEA</b> (Rabat) in Data Science. Valedictorian of his Data Science track, thesis ranked <b>1st of 96</b>.</p>
+              <ul>
+                <li><b>70+ models</b> shipped on production data · pipelines that processed <b>5M+ posts</b> on GCP</li>
+                <li>Machine learning, deep learning, NLP &amp; LLMs, computer vision (CLIP, DINO)</li>
+                <li>Published in <i>Transportation Engineering</i> (2026): explainable AI for winter runway friction</li>
+                <li>Benchmarks every model on quality, latency and cost before it ships</li>
+              </ul>
+              <p class="au-note">In this game the drones are everything that breaks a model in production — bugs, outliers, data leaks, overfitting — and the final boss is the Black Box he works to explain.</p>
+              <a class="au-link" href="https://elbasraoui.engineer" target="_blank" rel="noopener">elbasraoui.engineer ↗</a>
             </div>
             <button class="sbtn" data-action="back">BACK</button>
           </div>
@@ -203,8 +225,8 @@
         <!-- ============ VICTORY ============ -->
         <div id="victory" class="screen hidden">
           <div class="end-inner">
-            <div class="end-kicker">THE WARDEN HAS FALLEN</div>
-            <h2 class="end-title glitch gold" data-text="SIGNAL SURVIVED">SIGNAL SURVIVED</h2>
+            <div class="end-kicker">THE BLACK BOX IS OPEN</div>
+            <h2 class="end-title glitch gold" data-text="SHIPPED TO PROD">SHIPPED TO PROD</h2>
             <div class="end-reason" id="vic-reason"></div>
             <div class="rank" id="vic-rank">A</div>
             <div class="end-shards" id="vic-shards"></div>

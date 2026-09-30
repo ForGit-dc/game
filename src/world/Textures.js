@@ -255,11 +255,11 @@ export function makeHoloAdTexture(lines, seed = 3) {
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
   ctx.font = '700 64px "Chakra Petch"';
-  ctx.fillText(lines[0], 28, 26);
+  ctx.fillText(lines[0], 28, 26, 310);
   ctx.font = '400 26px "Share Tech Mono"';
   ctx.fillStyle = 'rgba(255,255,255,0.8)';
-  ctx.fillText(lines[1] || '', 30, 106);
-  ctx.fillText(lines[2] || '', 30, 142);
+  ctx.fillText(lines[1] || '', 30, 106, 310);
+  ctx.fillText(lines[2] || '', 30, 142, 310);
   // bar-code-ish glyphs
   for (let i = 0; i < 40; i++) {
     const w = rng.range(2, 6);

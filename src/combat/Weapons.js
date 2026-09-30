@@ -4,47 +4,47 @@ import { SHOT_Y } from './Projectiles.js';
 /** Weapon catalogue. `desc[i]` describes what level i+1 adds. */
 export const WEAPONS = {
   pulse: {
-    id: 'pulse', name: 'PULSE BLASTER', glyph: '⟫', color: '#7ff6ff', primary: true,
-    desc: ['Rapid-fire bolts where you aim.', '+30% bolt damage.', '+1 bolt per shot.', 'Bolts pierce 1 drone. +fire rate.', '+1 bolt, +20% damage.'],
-    evo: { name: 'RAILSTORM', with: 'coils', desc: 'Triple railguns that pierce everything — shields included.' },
+    id: 'pulse', name: 'PYTHON PULSE', glyph: '⟫', color: '#7ff6ff', primary: true,
+    desc: ['Rapid-fire tensors where you aim.', '+30% bolt damage.', '+1 bolt per shot.', 'Bolts pierce 1 drone. +fire rate.', '+1 bolt, +20% damage.'],
+    evo: { name: 'PYTORCH RAILSTORM', with: 'coils', desc: 'GPU-accelerated triple rails that pierce everything — shields included.' },
   },
   arc: {
-    id: 'arc', name: 'ARC CHAIN', glyph: 'ϟ', color: '#9fe8ff',
-    desc: ['Lightning leaps between nearby drones.', '+33% damage.', '+2 chain jumps.', '-20% cooldown.', '+2 jumps, +15% damage.'],
-    evo: { name: 'THUNDERCROWN', with: 'capacitor', desc: 'A permanent storm: lightning rains around you.' },
+    id: 'arc', name: 'XGBOOST CHAIN', glyph: 'ϟ', color: '#9fe8ff',
+    desc: ['Boosted lightning: each jump corrects the last.', '+33% damage.', '+2 chain jumps.', '-20% cooldown.', '+2 jumps, +15% damage.'],
+    evo: { name: 'GRADIENT STORM', with: 'capacitor', desc: 'A permanent storm: gradients rain down around you.' },
   },
   orbit: {
-    id: 'orbit', name: 'ORBIT BLADES', glyph: '✧', color: '#ff5ae0',
-    desc: ['Neon shards circle around you.', '+1 blade.', '+50% damage.', '+1 blade, wider orbit.', '+1 blade, +33% damage.'],
-    evo: { name: 'HALO OF KNIVES', with: 'frame', desc: 'Two counter-rotating rings of blades.' },
+    id: 'orbit', name: 'CLIP ORBIT', glyph: '✧', color: '#ff5ae0',
+    desc: ['Vision embeddings circle around you, slicing what they see.', '+1 blade.', '+50% damage.', '+1 blade, wider orbit.', '+1 blade, +33% damage.'],
+    evo: { name: 'DINO HALO', with: 'frame', desc: 'Two counter-rotating rings of embeddings.' },
   },
   nova: {
-    id: 'nova', name: 'NOVA PULSE', glyph: '◎', color: '#ffd36b',
-    desc: ['A shockwave bursts from you.', '+35% damage.', '+22% radius.', '-17% cooldown.', '+18% radius, +18% damage.'],
-    evo: { name: 'SUPERNOVA', with: 'nano', desc: 'Huge, frequent novas that repair you per hit.' },
+    id: 'nova', name: 'HDBSCAN NOVA', glyph: '◎', color: '#ffd36b',
+    desc: ['A clustering shockwave bursts from you.', '+35% damage.', '+22% radius.', '-17% cooldown.', '+18% radius, +18% damage.'],
+    evo: { name: 'UMAP SUPERNOVA', with: 'nano', desc: 'Huge, frequent novas that repair you per hit.' },
   },
   seeker: {
-    id: 'seeker', name: 'SEEKER SWARM', glyph: '➶', color: '#ffb35c', locked: 'seeker',
-    desc: ['Homing micro-missiles.', '+1 missile.', '+37% damage.', '-15% cooldown.', '+2 missiles, bigger blasts.'],
-    evo: { name: 'HYDRA', with: 'targeting', desc: 'Missiles split into three on impact.' },
+    id: 'seeker', name: 'RETRIEVAL SWARM', glyph: '➶', color: '#ffb35c', locked: 'seeker',
+    desc: ['Semantic retrieval: homing queries always find their target.', '+1 missile.', '+37% damage.', '-15% cooldown.', '+2 missiles, bigger blasts.'],
+    evo: { name: 'RERANKER HYDRA', with: 'targeting', desc: 'Every hit is reranked: missiles split into three on impact.' },
   },
   drone: {
-    id: 'drone', name: 'LASER DRONE', glyph: '⊹', color: '#b69cff', locked: 'drone',
-    desc: ['A companion drone lasers the nearest threat.', '+40% damage.', '+40% fire rate.', '+30% range.', 'Beams pierce 2, +27% damage.'],
-    evo: { name: 'TWIN SATELLITES', with: 'cycler', desc: 'Two drones. Beams pierce everything.' },
+    id: 'drone', name: 'LLM AGENT', glyph: '⊹', color: '#b69cff', locked: 'drone',
+    desc: ['An autonomous agent lasers the nearest threat.', '+40% damage.', '+40% fire rate.', '+30% range.', 'Beams pierce 2, +27% damage.'],
+    evo: { name: 'MULTI-AGENT', with: 'cycler', desc: 'Two agents. Beams pierce everything.' },
   },
 };
 
 export const PASSIVES = {
-  coils: { id: 'coils', name: 'OVERCHARGED COILS', glyph: 'Ψ', color: '#ffd36b', desc: '+12% damage.' },
-  cycler: { id: 'cycler', name: 'RAPID CYCLER', glyph: '≡', color: '#7ff6ff', desc: '-8% cooldowns, +8% fire rate.' },
-  frame: { id: 'frame', name: 'KINETIC FRAME', glyph: '»', color: '#22e6ff', desc: '+8% movement speed.' },
-  magnet: { id: 'magnet', name: 'MAGNET FIELD', glyph: '∪', color: '#20ffd0', desc: '+35% pickup radius.' },
-  nano: { id: 'nano', name: 'NANO MESH', glyph: '+', color: '#20ffa0', desc: '+20 max integrity, +0.5 repair/s.' },
-  capacitor: { id: 'capacitor', name: 'CAPACITOR', glyph: 'Ξ', color: '#8b5cff', desc: '+12% area and reach.' },
-  targeting: { id: 'targeting', name: 'TARGETING MATRIX', glyph: '⌖', color: '#ff2a55', desc: '+7% critical chance.' },
-  phase: { id: 'phase', name: 'PHASE DRIVE', glyph: '↯', color: '#4d9dff', desc: '-10% dash cooldown, extra charges at ranks 1, 3, 5.' },
-  echo: { id: 'echo', name: 'ECHO LINK', glyph: '◈', color: '#a6fffb', desc: '+12% XP, +1s overclock.' },
+  coils: { id: 'coils', name: 'CUDA CORES', glyph: 'Ψ', color: '#ffd36b', desc: '+12% damage.' },
+  cycler: { id: 'cycler', name: 'TERRAFORM', glyph: '≡', color: '#7ff6ff', desc: '-8% cooldowns, +8% fire rate.' },
+  frame: { id: 'frame', name: 'CLOUD RUN', glyph: '»', color: '#22e6ff', desc: '+8% movement speed.' },
+  magnet: { id: 'magnet', name: 'DATA PIPELINE', glyph: '∪', color: '#20ffd0', desc: '+35% pickup radius.' },
+  nano: { id: 'nano', name: 'MONITORING', glyph: '+', color: '#20ffa0', desc: '+20 max integrity, +0.5 repair/s.' },
+  capacitor: { id: 'capacitor', name: 'EMBEDDINGS', glyph: 'Ξ', color: '#8b5cff', desc: '+12% area and reach.' },
+  targeting: { id: 'targeting', name: 'FROZEN TEST SET', glyph: '⌖', color: '#ff2a55', desc: '+7% critical chance.' },
+  phase: { id: 'phase', name: 'SERVERLESS', glyph: '↯', color: '#4d9dff', desc: '-10% dash cooldown, extra charges at ranks 1, 3, 5.' },
+  echo: { id: 'echo', name: 'BENCHMARK', glyph: '◈', color: '#a6fffb', desc: '+12% XP, +1s overclock.' },
 };
 
 const _v = new THREE.Vector3();

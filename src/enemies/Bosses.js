@@ -183,7 +183,7 @@ const _white = new THREE.Color(1, 1, 1);
 
 export class HiveMother extends Boss {
   constructor(game, hpMul = 1) {
-    super(game, { name: 'HIVE MOTHER', title: 'CARRIER OF A THOUSAND WISPS', hp: 2400 * hpMul, r: 2.8, y: 3.8, color: '#ff5a2a' });
+    super(game, { name: 'THE HALLUCINATION', title: 'IT INVENTS A THOUSAND BUGS', hp: 2400 * hpMul, r: 2.8, y: 3.8, color: '#ff5a2a' });
     const M = game.horde.meshes.wisp.body.material;
     // shell of floating hex-ish plates around a molten core
     const core = new THREE.Mesh(new THREE.IcosahedronGeometry(2.0, 2), this.glow('#ff5a2a', 3));
@@ -317,7 +317,7 @@ export class HiveMother extends Boss {
 
 export class Lancer extends Boss {
   constructor(game, hpMul = 1) {
-    super(game, { name: 'LANCER', title: 'THE CORE’S EXECUTIONER', hp: 3800 * hpMul, r: 1.7, y: 1.9, color: '#ff2bd6' });
+    super(game, { name: 'OVERFIT', title: 'PERFECT ON TRAIN · LETHAL IN PROD', hp: 3800 * hpMul, r: 1.7, y: 1.9, color: '#ff2bd6' });
     const M = game.horde.meshes.shard.body.material.clone();
     M.color.setRGB(0.3, 0.26, 0.36);
     const body = new THREE.Mesh(new THREE.ConeGeometry(0.9, 4.2, 6), M);
@@ -471,7 +471,7 @@ export class Lancer extends Boss {
 
 export class Warden extends Boss {
   constructor(game, hpMul = 1) {
-    super(game, { name: 'THE WARDEN', title: 'THE EYE THAT KEEPS VASHTA', hp: 8200 * hpMul, r: 2.6, y: 4.2, color: '#ff2a55' });
+    super(game, { name: 'THE BLACK BOX', title: 'THE MODEL NOBODY CAN EXPLAIN', hp: 8200 * hpMul, r: 2.6, y: 4.2, color: '#ff2a55' });
     const M = game.horde.meshes.sentinel.body.material.clone();
     M.color.setRGB(0.24, 0.22, 0.3);
     const S = 2.4;

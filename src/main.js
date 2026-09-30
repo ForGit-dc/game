@@ -30,7 +30,7 @@ function webglOK() {
 }
 
 async function main() {
-  line('NEON//ECHO — K-7 REACTIVATION SEQUENCE');
+  line('NEON//ECHO — A GAME BY ANASS EL BASRAOUI');
   await wait(120);
   if (!webglOK()) {
     line('FATAL: WebGL2 is not available in this browser.', 'warn');

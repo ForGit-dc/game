@@ -5,6 +5,7 @@ Read it fully before touching code.
 
 ## The user & how to work with them
 
+- The user is **Anass El Basraoui**, Data Scientist & ML Engineer (ENSAI + INSEA, works at Opsci, Rennes). The game is **personalised around him** (see "Personalisation").
 - The user writes casual **French** (sometimes with typos). **Always answer in French.**
 - They gave total creative freedom ("t'es le chef", "surprends-moi") and want something **jaw-dropping** ("un truc extraordinaire") that **isn't boring after 5 minutes** (long-term replayability).
 - **NO MUSIC. Ever.** Music is haram for the user. No melodic score, no chord/arpeggio jingles, no melodic stingers, no ambience made of random notes.
@@ -26,6 +27,19 @@ Files (all live): `game/{Game,TopCamera,Input}.js`, `player/{Player,PlayerModel}
 Audio: user said the first storm sounded "fake et agaçant" → rewritten as **pre-rendered buffers** (`_renderRain` droplet synthesis, `_renderThunder` rumble bank + near crack), thunder throttled (≥2.5 s apart) and lightning much rarer (14–36 s), ambience slider in pause (`localStorage neon-echo-amb`). If the user still dislikes it, lower/disable thunder first.
 
 Possible next steps: real-GPU playtest feedback from the user, balance tuning (spawn rate in `Waves.update`, xp curve `xpToNext`), more enemy variety/bosses, stripping `Level.build()`.
+
+## Personalisation (Anass's game)
+
+The game is signed "A game by Anass El Basraoui" and reskinned with his ML world — gameplay ids are unchanged, only display names/texts:
+- Weapons: `pulse` PYTHON PULSE → PYTORCH RAILSTORM · `arc` XGBOOST CHAIN → GRADIENT STORM · `orbit` CLIP ORBIT → DINO HALO · `nova` HDBSCAN NOVA → UMAP SUPERNOVA · `seeker` RETRIEVAL SWARM → RERANKER HYDRA · `drone` LLM AGENT → MULTI-AGENT.
+- Passives: `coils` CUDA CORES · `cycler` TERRAFORM · `frame` CLOUD RUN · `magnet` DATA PIPELINE · `nano` MONITORING · `capacitor` EMBEDDINGS · `targeting` FROZEN TEST SET · `phase` SERVERLESS · `echo` BENCHMARK.
+- Enemies: BUG (wisp), OUTLIER (shard), DATA LEAK (sentinel), LEGACY CODE (bulwark), DUPLICATE (splitter), MEMORY LEAK (bomber). Bosses: THE HALLUCINATION (hive), OVERFIT (lancer), THE BLACK BOX (warden). Events: DATA DRIFT STORM (meteors), GPU OUTAGE (blackout).
+- Menu has an **AUTHOR** panel (`#panel-author` in `index.html`) built from his CV; neon signs/holograms around the arena show his name, schools and stack (`Arena.buildScenery`).
+- **Privacy:** the game is public. Only his name, role, achievements and website `elbasraoui.engineer` are shown. Never put his phone number or e-mail in the game or the repo.
+
+## Deployment
+
+GitHub Pages via `.github/workflows/deploy.yml` (build + deploy on every push to `main`), `base: './'` in `vite.config.js`. URL: `https://forgit-dc.github.io/game/`. The user must enable Pages once (Settings → Pages → Source: GitHub Actions); the Codespace token cannot do it (403).
 
 ## v2 game design (implemented)
 

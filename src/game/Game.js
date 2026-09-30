@@ -251,6 +251,7 @@ export class Game {
       case 'play': this.startRun(); break;
       case 'controls':
       case 'credits':
+      case 'author':
       case 'lattice':
         this.ui.panel(action);
         break;
@@ -338,8 +339,8 @@ export class Game {
     this.cam.targetDist = 20;
     this.camera.position.set(0, 40, 30);
     document.body.classList.add('playing');
-    this.ui.banner('THE RING // VASHTA', 'SURVIVE', `${this.overdrive ? 'OVERDRIVE · ' : ''}10:00 until the Warden wakes`, '');
-    this.ui.log('SYSTEM RESTORED. UNIT K-7 ONLINE.', 'sys');
+    this.ui.banner('OPERATOR // ANASS EL BASRAOUI', 'SHIP THE MODEL', `${this.overdrive ? 'OVERDRIVE · ' : ''}10:00 until the Black Box wakes`, '');
+    this.ui.log('PIPELINE ONLINE. OPERATOR: ANASS.', 'sys');
     this.schedule(1.4, () => this.ui.prompt(`${this.keyHint('KeyW', 'KeyA', 'KeyS', 'KeyD')} MOVE · <kbd>MOUSE</kbd> AIM · <kbd>LMB</kbd> FIRE · <kbd>SPACE</kbd> DASH · <kbd>RMB</kbd> BLADE`, 8));
     this.schedule(10, () => this.ui.prompt(`<kbd>T</kbd> TOGGLE AUTO-FIRE (${this.settings.autoFire ? 'ON' : 'OFF'}) · <kbd>WHEEL</kbd> ZOOM`, 5));
   }
@@ -351,7 +352,7 @@ export class Game {
     this.cam.cinematic = null;
     this.waves.startEndless();
     this.audio.setMuffle(0);
-    this.ui.banner('ENDLESS', 'THE CITY KEEPS FALLING', 'How long can a courier last?', 'warn');
+    this.ui.banner('ENDLESS', 'PRODUCTION NEVER SLEEPS', 'How long can one engineer hold the line?', 'warn');
     document.body.classList.add('playing');
   }
 
@@ -813,7 +814,7 @@ export class Game {
     this.fx.ring(_v.set(this.player.pos.x, 0.3, this.player.pos.z), '#a6fffb', 8, 0.6);
     this.ui.showCards(cards, {
       title: source === 'chest' ? 'SUPPLY CACHE' : `LEVEL ${this.progression.level}`,
-      kicker: source === 'chest' ? 'ELITE DROP DECRYPTED' : 'DATA THRESHOLD REACHED',
+      kicker: source === 'chest' ? 'ELITE DROP DECRYPTED' : 'EPOCH COMPLETE · LOSS DECREASING',
       rerolls: this.progression.rerolls,
       onPick: (card) => this.pickCard(card),
     });
@@ -956,7 +957,7 @@ export class Game {
   }
 
   onEventStart(ev) {
-    this.ui.banner('ALERT', ev.label, ev.type === 'meteors' ? 'Stay out of the red circles — they crush drones too.' : 'Power grid down. Trust your light.', 'warn');
+    this.ui.banner('ALERT', ev.label, ev.type === 'meteors' ? 'The data is shifting. Stay out of the red circles — they crush bugs too.' : 'The GPUs went dark. Trust your light.', 'warn');
   }
 
   onEventEnd(ev) {
@@ -1040,7 +1041,7 @@ export class Game {
 
   onWardenPhase(ph) {
     if (ph === 2) {
-      this.ui.banner('PHASE II', 'THE CORE IS WATCHING', 'Its lance falls where you stand — keep moving.', 'red');
+      this.ui.banner('PHASE II', 'IT REFUSES TO EXPLAIN ITSELF', 'Its lance falls where you stand — keep moving.', 'red');
       this.coreTarget.set(0, -18, -105);
       this.core.setAwake(1.6);
       this.audio.collapseStart();
@@ -1149,7 +1150,7 @@ export class Game {
     this.vicT = 0;
     this.victoryShown = false;
     this.cam.cinematic = { pos: this.camera.position.clone(), look: this.player.pos.clone(), lambda: 1.2 };
-    this.ui.banner('SIGNAL SURVIVED', 'THE WARDEN HAS FALLEN', 'The Eye closes. For now.', 'gold');
+    this.ui.banner('MODEL EXPLAINED', 'THE BLACK BOX IS OPEN', 'Interpretable. Benchmarked. Shipped.', 'gold');
     this.audio.victory();
     for (const e of [...this.horde.list]) if (e.alive) this.horde.kill(e, 'victory');
     this.horde.list.length = 0;
@@ -1183,7 +1184,7 @@ export class Game {
     this.ui.showEnd(victory ? 'victory' : 'gameover', {
       rows, score, rank, earned, newBest, total: this.meta.shards,
       build: this.progression.slots(),
-      reason: victory ? 'The package was you. You arrived.' : t < RUN_LENGTH ? `The Ring fell silent at ${mm(t)}.` : 'The endless city claimed you.',
+      reason: victory ? 'Anass shipped it. The model is live in production.' : t < RUN_LENGTH ? `The Ring fell silent at ${mm(t)}.` : 'The endless city claimed you.',
       endless: victory && !this.waves.endless,
     });
     this.audio.setIntensity(0);

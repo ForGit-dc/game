@@ -6,12 +6,12 @@ import { rand } from '../utils/math.js';
  * Enemy roster. hp scales with time; `xp` is the value of the shard they drop.
  */
 export const ENEMY_TYPES = {
-  wisp: { hp: 12, speed: 5.0, r: 0.45, dmg: 6, xp: 1, y: 1.0, color: '#ff2a55', score: 10, mass: 1, cap: 520, name: 'WISP' },
-  shard: { hp: 26, speed: 4.2, r: 0.55, dmg: 16, xp: 2, y: 1.0, color: '#ff2bd6', score: 20, mass: 1.5, cap: 140, name: 'SHARD' },
-  sentinel: { hp: 55, speed: 2.9, r: 0.95, dmg: 12, xp: 4, y: 2.1, color: '#ff8a2b', score: 40, mass: 3, cap: 90, name: 'SENTINEL' },
-  bulwark: { hp: 280, speed: 2.1, r: 1.35, dmg: 22, xp: 12, y: 1.3, color: '#8b5cff', score: 100, mass: 9, cap: 50, name: 'BULWARK' },
-  splitter: { hp: 48, speed: 3.4, r: 0.85, dmg: 12, xp: 3, y: 1.2, color: '#20ffd0', score: 30, mass: 2, cap: 90, name: 'SPLITTER' },
-  bomber: { hp: 30, speed: 4.7, r: 0.6, dmg: 26, xp: 3, y: 0.9, color: '#ffd36b', score: 25, mass: 1.2, cap: 90, name: 'BOMBER' },
+  wisp: { hp: 12, speed: 5.0, r: 0.45, dmg: 6, xp: 1, y: 1.0, color: '#ff2a55', score: 10, mass: 1, cap: 520, name: 'BUG' },
+  shard: { hp: 26, speed: 4.2, r: 0.55, dmg: 16, xp: 2, y: 1.0, color: '#ff2bd6', score: 20, mass: 1.5, cap: 140, name: 'OUTLIER' },
+  sentinel: { hp: 55, speed: 2.9, r: 0.95, dmg: 12, xp: 4, y: 2.1, color: '#ff8a2b', score: 40, mass: 3, cap: 90, name: 'DATA LEAK' },
+  bulwark: { hp: 280, speed: 2.1, r: 1.35, dmg: 22, xp: 12, y: 1.3, color: '#8b5cff', score: 100, mass: 9, cap: 50, name: 'LEGACY CODE' },
+  splitter: { hp: 48, speed: 3.4, r: 0.85, dmg: 12, xp: 3, y: 1.2, color: '#20ffd0', score: 30, mass: 2, cap: 90, name: 'DUPLICATE' },
+  bomber: { hp: 30, speed: 4.7, r: 0.6, dmg: 26, xp: 3, y: 0.9, color: '#ffd36b', score: 25, mass: 1.2, cap: 90, name: 'MEMORY LEAK' },
 };
 
 const CELL = 3;

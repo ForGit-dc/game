@@ -3,13 +3,13 @@ import { rand, pick } from '../utils/math.js';
 export const RUN_LENGTH = 600;
 
 const TIMELINE = [
-  { t: 120, type: 'meteors', dur: 22, label: 'METEOR STORM' },
-  { t: 180, type: 'boss', id: 'hive', label: 'HIVE MOTHER' },
+  { t: 120, type: 'meteors', dur: 22, label: 'DATA DRIFT STORM' },
+  { t: 180, type: 'boss', id: 'hive', label: 'THE HALLUCINATION' },
   { t: 300, type: 'collapse', ring: 2, label: 'OUTER RING COLLAPSE' },
-  { t: 390, type: 'boss', id: 'lancer', label: 'LANCER' },
-  { t: 430, type: 'meteors', dur: 22, label: 'METEOR STORM' },
-  { t: 480, type: 'blackout', dur: 26, label: 'BLACKOUT' },
-  { t: 600, type: 'boss', id: 'warden', label: 'THE WARDEN' },
+  { t: 390, type: 'boss', id: 'lancer', label: 'OVERFIT' },
+  { t: 430, type: 'meteors', dur: 22, label: 'DATA DRIFT STORM' },
+  { t: 480, type: 'blackout', dur: 26, label: 'GPU OUTAGE' },
+  { t: 600, type: 'boss', id: 'warden', label: 'THE BLACK BOX' },
 ];
 
 const UNLOCK = { wisp: 0, shard: 60, sentinel: 120, splitter: 210, bomber: 300, bulwark: 330 };
@@ -48,8 +48,8 @@ export class Waves {
     const bosses = ['hive', 'lancer', 'warden'];
     for (let k = 0; k < 12; k++) {
       const at = base + 45 + k * 75;
-      if (k % 2 === 0) this.events.push({ t: at, type: 'boss', id: bosses[(k / 2) % 3], label: bosses[(k / 2) % 3] === 'hive' ? 'HIVE MOTHER' : bosses[(k / 2) % 3] === 'lancer' ? 'LANCER' : 'THE WARDEN', done: false, warned: false, hpBoost: 1.6 + k * 0.25 });
-      else this.events.push({ t: at, type: k % 3 === 1 ? 'meteors' : 'blackout', dur: 22, label: k % 3 === 1 ? 'METEOR STORM' : 'BLACKOUT', done: false, warned: false });
+      if (k % 2 === 0) this.events.push({ t: at, type: 'boss', id: bosses[(k / 2) % 3], label: bosses[(k / 2) % 3] === 'hive' ? 'THE HALLUCINATION' : bosses[(k / 2) % 3] === 'lancer' ? 'OVERFIT' : 'THE BLACK BOX', done: false, warned: false, hpBoost: 1.6 + k * 0.25 });
+      else this.events.push({ t: at, type: k % 3 === 1 ? 'meteors' : 'blackout', dur: 22, label: k % 3 === 1 ? 'DATA DRIFT STORM' : 'GPU OUTAGE', done: false, warned: false });
     }
   }
 

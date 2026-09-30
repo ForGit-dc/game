@@ -78,7 +78,7 @@ export class UI {
   }
 
   panel(name) {
-    for (const p of ['controls', 'credits', 'lattice']) $(`panel-${p}`).classList.toggle('hidden', p !== name);
+    for (const p of ['controls', 'credits', 'author', 'lattice']) $(`panel-${p}`).classList.toggle('hidden', p !== name);
     this.el.menu.classList.toggle('wide-open', name === 'lattice');
     if (name === 'lattice') this.renderLattice();
   }
@@ -90,7 +90,7 @@ export class UI {
     const s = m.stats;
     $('menu-foot').textContent = s.runs
       ? `RUNS ${s.runs} · BEST ${fmt(s.bestTime)} · ${s.bestScore.toLocaleString('en-US')} PTS · ${s.victories} VICTORIES`
-      : 'UNIT K-7 // NO RECORD — THE RING AWAITS';
+      : 'OPERATOR ANASS // NO RECORD — THE RING AWAITS';
     const od = m.level('overdrive') > 0;
     $('diff-btn').classList.toggle('hidden', !od);
     $('diff-label').textContent = g.difficulty === 'overdrive' ? 'OVERDRIVE' : 'NORMAL';

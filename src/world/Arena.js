@@ -326,7 +326,7 @@ export class Arena extends Level {
       towers.push({ x, z, top, a, w, d, south });
     }
     // signs & holograms facing the arena
-    const texts = ['VOLTA', 'MIRAGE', 'LUMEN', 'KAIROS', 'SYNTH', 'ORBITAL', 'NO SIGNAL', 'OPEN 24H', 'DREAM ENGINE', 'ECHO'];
+    const texts = ['ANASS', 'EL BASRAOUI', 'PYTORCH', 'ENSAI', 'XGBOOST', 'INSEA', 'MACHINE LEARNING', 'RENNES', 'DATA SCIENCE', 'CASABLANCA'];
     towers.forEach((t, i) => {
       if (t.south > 0.2) return;
       const face = Math.atan2(-t.x, -t.z); // yaw that faces the centre
@@ -339,7 +339,7 @@ export class Arena extends Level {
         });
       } else if (i % 3 === 0) {
         this.holoAd({
-          lines: [texts[(i + 3) % texts.length], 'the city is falling.', 'stay tuned.'], color: [C.CYAN, C.MAGENTA, C.ORANGE][i % 3],
+          lines: [i % 2 ? 'ANASS EL BASRAOUI' : 'ML ENGINEER', 'data scientist & ml engineer', 'elbasraoui.engineer'], color: [C.CYAN, C.MAGENTA, C.ORANGE][i % 3],
           x: px, y: t.top + 4, z: pz, ry: face, w: 9, seed: i,
         });
       }

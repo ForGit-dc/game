@@ -1602,3 +1602,15 @@ body:not(.playing) #hud .hud-bc { opacity: 0.12; }
   .hud-top { width: min(420px, 40vw); }
   .hud-tr .val { min-width: 60px; }
 }
+
+/* --- author panel --- */
+.author { font-size: 14px; line-height: 1.55; color: var(--muted); }
+.au-name { font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #f2fdff; text-shadow: 0 0 16px rgba(34, 230, 255, 0.6); }
+.au-role { font-family: var(--mono); font-size: 12px; letter-spacing: 0.2em; color: var(--magenta); margin: 4px 0 12px; }
+.author b { color: var(--text); }
+.author ul { margin: 8px 0; padding-left: 18px; }
+.author li { margin: 4px 0; }
+.author li::marker { color: var(--cyan); }
+.au-note { color: var(--gold); opacity: 0.9; }
+.au-link { display: inline-block; margin-top: 4px; font-family: var(--mono); color: var(--cyan); text-decoration: none; letter-spacing: 0.1em; border-bottom: 1px solid var(--cyan-dim); }
+.au-link:hover { color: #fff; border-color: #fff; }
