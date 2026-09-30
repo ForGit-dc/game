@@ -9,6 +9,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 
 concurrency:
   group: pages
@@ -37,5 +38,19 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # If Pages is still set to "Deploy from a branch", GitHub also publishes the raw source on every push.
+      # Wait for that run to finish so the built game is always the deployment that lands last.
+      - name: Wait for the branch-mode Pages build, if any
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sleep 10
+          for i in $(seq 1 50); do
+            n=$(gh api "repos/${{ github.repository }}/actions/runs?head_sha=${{ github.sha }}&per_page=50" \
+              -q '[.workflow_runs[] | select(.name == "pages build and deployment" and .status != "completed")] | length')
+            if [ "$n" = "0" ]; then break; fi
+            echo "branch-mode Pages build still running ($n)…"
+            sleep 6
+          done
       - id: deployment
         uses: actions/deploy-pages@v4
