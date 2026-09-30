@@ -533,6 +533,139 @@ export class AudioEngine {
     for (let i = 0; i < 4; i++) this._tone(o.node, { type: 'square', f: 200 + Math.random() * 2000, t: i * 0.03, dur: 0.03, vol: 0.05 });
   }
 
+  // ================================================================ survivor SFX (non-melodic)
+
+  levelUp() {
+    if (!this.ready) return;
+    const o = this._out(null, 0.8, 1, 0.8);
+    this._tone(o.node, { type: 'sine', f: 300, f2: 2400, dur: 0.5, vol: 0.14, a: 0.01 });
+    this._noise(o.node, { dur: 0.8, vol: 0.14, type: 'bandpass', f: 2000, f2: 10000, q: 2, a: 0.1 });
+    this._tone(o.node, { type: 'sine', f: 60, f2: 40, t: 0.05, dur: 0.4, vol: 0.3 });
+  }
+
+  xpTick() {
+    if (!this.ready || this._throttle('xp', 45)) return;
+    this._tone(this.sfxBus, { type: 'sine', f: 1900 + Math.random() * 500, dur: 0.035, vol: 0.025 });
+  }
+
+  kill(size = 1) {
+    if (!this.ready || this._throttle('kill', 35)) return;
+    const o = this._out(null, 0.35 * Math.min(1.6, size), 1, 0.05);
+    this._noise(o.node, { dur: 0.09 * size, vol: 0.3, type: 'bandpass', f: 1400 + Math.random() * 800, f2: 300, q: 1.2 });
+    this._tone(o.node, { type: 'sine', f: 180 / size, f2: 50, dur: 0.1 * size, vol: 0.25 });
+  }
+
+  bossWarn() {
+    if (!this.ready) return;
+    const o = this._out(null, 1, 1, 0.8);
+    for (let i = 0; i < 3; i++) {
+      this._tone(o.node, { type: 'sawtooth', f: 90, f2: 60, t: i * 0.5, dur: 0.45, vol: 0.2 });
+      this._noise(o.node, { t: i * 0.5, dur: 0.4, vol: 0.14, type: 'lowpass', f: 900, f2: 100 });
+    }
+    this.thunder(0.2, 0.9);
+  }
+
+  bossCharge(pos, dur = 1) {
+    if (!this.ready) return;
+    const o = this._out(pos, 0.8, 30, 0.3);
+    this._tone(o.node, { type: 'sawtooth', f: 70, f2: 420, dur, vol: 0.09, a: 0.1, curve: 'lin' });
+    this._noise(o.node, { dur, vol: 0.1, type: 'bandpass', f: 400, f2: 4000, q: 4, a: dur * 0.6 });
+  }
+
+  laser(pos) {
+    if (!this.ready) return;
+    const o = this._out(pos, 0.8, 30, 0.3);
+    this._tone(o.node, { type: 'sawtooth', f: 180, f2: 150, dur: 3.4, vol: 0.06, a: 0.05 });
+    this._noise(o.node, { dur: 3.4, vol: 0.08, type: 'bandpass', f: 2500, q: 6, a: 0.05 });
+  }
+
+  rail() {
+    if (!this.ready) return;
+    const o = this._out(null, 0.7, 1, 0.3);
+    this._noise(o.node, { dur: 0.25, vol: 0.35, type: 'highpass', f: 2500, a: 0.002 });
+    this._tone(o.node, { type: 'square', f: 1400, f2: 90, dur: 0.22, vol: 0.12 });
+    this._tone(o.node, { type: 'sine', f: 90, f2: 40, dur: 0.25, vol: 0.35 });
+  }
+
+  laserZap() {
+    if (!this.ready || this._throttle('lz', 70)) return;
+    this._tone(this.sfxBus, { type: 'square', f: 2600, f2: 900, dur: 0.05, vol: 0.03 });
+  }
+
+  arcZap(big = false) {
+    if (!this.ready || this._throttle('arc', 60)) return;
+    const o = this._out(null, big ? 0.6 : 0.45, 1, big ? 0.4 : 0.1);
+    this._noise(o.node, { dur: big ? 0.22 : 0.12, vol: 0.35, type: 'highpass', f: 3000, a: 0.002 });
+    for (let i = 0; i < 3; i++) this._tone(o.node, { type: 'square', f: 400 + Math.random() * 1600, t: i * 0.02, dur: 0.03, vol: 0.05 });
+    if (big) this._tone(o.node, { type: 'sine', f: 70, f2: 35, dur: 0.3, vol: 0.25 });
+  }
+
+  nova(big = false) {
+    if (!this.ready) return;
+    const o = this._out(null, big ? 0.8 : 0.6, 1, 0.3);
+    this._tone(o.node, { type: 'sine', f: 120, f2: 40, dur: 0.4, vol: 0.4 });
+    this._noise(o.node, { dur: 0.35, vol: 0.25, type: 'lowpass', f: 4000, f2: 200, a: 0.005 });
+  }
+
+  missileLaunch() {
+    if (!this.ready || this._throttle('ml', 120)) return;
+    const o = this._out(null, 0.4, 1, 0.1);
+    this._noise(o.node, { dur: 0.3, vol: 0.25, type: 'bandpass', f: 800, f2: 3000, q: 2, a: 0.01 });
+  }
+
+  missileHit() {
+    if (!this.ready || this._throttle('mh', 50)) return;
+    const o = this._out(null, 0.4, 1, 0.1);
+    this._noise(o.node, { dur: 0.18, vol: 0.3, type: 'lowpass', f: 3000, f2: 200 });
+    this._tone(o.node, { type: 'sine', f: 110, f2: 45, dur: 0.15, vol: 0.2 });
+  }
+
+  bomberArm() {
+    if (!this.ready || this._throttle('ba', 90)) return;
+    for (let i = 0; i < 3; i++) this._tone(this.sfxBus, { type: 'square', f: 1200, t: i * 0.2, dur: 0.06, vol: 0.04 });
+  }
+
+  shardAim() {
+    if (!this.ready || this._throttle('sa', 120)) return;
+    this._tone(this.sfxBus, { type: 'sawtooth', f: 500, f2: 1800, dur: 0.5, vol: 0.025, a: 0.05 });
+  }
+
+  chest() {
+    if (!this.ready) return;
+    const o = this._out(null, 0.8, 1, 0.6);
+    this._noise(o.node, { dur: 0.7, vol: 0.2, type: 'bandpass', f: 600, f2: 8000, q: 2, a: 0.05 });
+    this._tone(o.node, { type: 'sine', f: 200, f2: 1200, dur: 0.5, vol: 0.12 });
+    this._tone(o.node, { type: 'sine', f: 60, f2: 35, dur: 0.4, vol: 0.3 });
+  }
+
+  evolve() {
+    if (!this.ready) return;
+    const o = this._out(null, 1, 1, 1);
+    this._tone(o.node, { type: 'sawtooth', f: 60, f2: 1600, dur: 1.2, vol: 0.08, a: 0.3 });
+    this._noise(o.node, { dur: 1.4, vol: 0.2, type: 'bandpass', f: 300, f2: 9000, q: 1.5, a: 0.6 });
+    this._tone(o.node, { type: 'sine', f: 55, f2: 30, t: 1.1, dur: 0.8, vol: 0.45 });
+    this.thunder(1.1, 0.6);
+  }
+
+  meteor() {
+    if (!this.ready || this._throttle('met', 80)) return;
+    const o = this._out(null, 0.6, 1, 0.3);
+    this._tone(o.node, { type: 'sine', f: 90, f2: 30, dur: 0.5, vol: 0.4 });
+    this._noise(o.node, { dur: 0.45, vol: 0.3, type: 'lowpass', f: 2500, f2: 120 });
+  }
+
+  powerDown() {
+    if (!this.ready) return;
+    const o = this._out(null, 0.9, 1, 0.8);
+    this._tone(o.node, { type: 'sawtooth', f: 240, f2: 25, dur: 2.2, vol: 0.15 });
+    this._noise(o.node, { dur: 1.5, vol: 0.12, type: 'lowpass', f: 3000, f2: 80 });
+  }
+
+  blocked() {
+    if (!this.ready || this._throttle('blk', 90)) return;
+    this._tone(this.sfxBus, { type: 'triangle', f: 1800, f2: 1500, dur: 0.06, vol: 0.05 });
+  }
+
   // ================================================================ the storm
 
   _loopNoise(buf, type, freq, q, vol, pan, dest) {

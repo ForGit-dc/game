@@ -6,7 +6,7 @@ import { rand } from '../utils/math.js';
  * Enemy roster. hp scales with time; `xp` is the value of the shard they drop.
  */
 export const ENEMY_TYPES = {
-  wisp: { hp: 12, speed: 5.0, r: 0.45, dmg: 8, xp: 1, y: 1.0, color: '#ff2a55', score: 10, mass: 1, cap: 520, name: 'WISP' },
+  wisp: { hp: 12, speed: 5.0, r: 0.45, dmg: 6, xp: 1, y: 1.0, color: '#ff2a55', score: 10, mass: 1, cap: 520, name: 'WISP' },
   shard: { hp: 26, speed: 4.2, r: 0.55, dmg: 16, xp: 2, y: 1.0, color: '#ff2bd6', score: 20, mass: 1.5, cap: 140, name: 'SHARD' },
   sentinel: { hp: 55, speed: 2.9, r: 0.95, dmg: 12, xp: 4, y: 2.1, color: '#ff8a2b', score: 40, mass: 3, cap: 90, name: 'SENTINEL' },
   bulwark: { hp: 280, speed: 2.1, r: 1.35, dmg: 22, xp: 12, y: 1.3, color: '#8b5cff', score: 100, mass: 9, cap: 50, name: 'BULWARK' },
@@ -184,7 +184,7 @@ export class Horde {
     return this.list.length;
   }
 
-  spawn(type, x, z, { elite = false, mini = false, rise = true, hpMul = 1 } = {}) {
+  spawn(type, x, z, { elite = false, mini = false, rise = true, warp = false, hpMul = 1 } = {}) {
     const def = ENEMY_TYPES[type];
     let n = 0;
     for (const e of this.list) if (e.type === type) n++;
@@ -195,7 +195,7 @@ export class Horde {
       id: this.nextId++, type, def, x, z, y: rise ? -6 - Math.random() * 4 : def.y,
       vx: 0, vz: 0, kx: 0, kz: 0, hp, maxHp: hp, r: def.r * scale, scale, elite, mini,
       flash: 0, state: 'seek', st: 0, t: Math.random() * 10, facing: Math.atan2(-x, -z),
-      spawnT: rise ? 1 : 0, alive: true, fireT: rand(1.5, 3), dirX: 0, dirZ: 0, burn: 0, hitCd: new Map(),
+      spawnT: rise ? 1 : warp ? 0.7 : 0, alive: true, fireT: rand(1.5, 3), dirX: 0, dirZ: 0, burn: 0, hitCd: new Map(),
       speed: def.speed * (mini ? 1.25 : 1) * rand(0.92, 1.08) * (elite ? 0.85 : 1),
     };
     this.list.push(e);
@@ -443,14 +443,14 @@ export class Horde {
     if (!e.alive) return;
     e.alive = false;
     const g = this.game;
-    if (e.type === 'splitter' && !e.mini) {
+    if (e.type === 'splitter' && !e.mini && cause !== 'victory') {
       for (let k = 0; k < 3; k++) {
         const a = (k / 3) * Math.PI * 2 + Math.random();
         const m = this.spawn('wisp', e.x + Math.cos(a) * 0.8, e.z + Math.sin(a) * 0.8, { mini: true, rise: false, hpMul: g.waves.hpMul });
         if (m) { m.kx = Math.cos(a) * 6; m.kz = Math.sin(a) * 6; m.y = e.y; }
       }
     }
-    if (e.type === 'bomber' && cause !== 'selfdestruct') this.explodeBomber(e, false);
+    if (e.type === 'bomber' && cause !== 'selfdestruct' && cause !== 'victory') this.explodeBomber(e, false);
     g.onEnemyKilled(e, cause);
   }
 
@@ -498,11 +498,11 @@ export class Horde {
       M.glow.setMatrixAt(i, _m);
       // body: dark metal that flashes white when hit
       const f = e.flash;
-      _c.setRGB(0.22 + f * 2.5, 0.22 + f * 2.5, 0.26 + f * 2.5);
+      _c.setRGB(0.42 + f * 2.5, 0.42 + f * 2.5, 0.48 + f * 2.5);
       if (e.elite) _c.lerp(_gold, 0.35);
       M.body.setColorAt(i, _c);
-      let gi = 3.2;
-      if (e.state === 'aim' || e.state === 'charge') gi = 3.2 + e.st * 10;
+      let gi = 2.3;
+      if (e.state === 'aim' || e.state === 'charge') gi = 2.3 + e.st * 9;
       if (e.state === 'armed') gi = Math.sin(e.st * 40) > 0 ? 9 : 2;
       _c.copy(M.color);
       if (e.elite) _c.lerp(_gold, 0.55);
@@ -510,11 +510,11 @@ export class Horde {
       M.glow.setColorAt(i, _c);
       // floor glow
       if (dc < 1100) {
-        const ds = e.r * 5 * (1 - e.spawnT);
+        const ds = e.r * 3.6 * (1 - e.spawnT);
         _q.identity();
         _m.compose(_p.set(e.x, 0.04, e.z), _q, _s.set(ds, 1, ds));
         this.decals.setMatrixAt(dc, _m);
-        _c.copy(M.color).multiplyScalar(e.elite ? 0.7 : 0.4);
+        _c.copy(M.color).multiplyScalar(e.elite ? 0.45 : 0.16);
         this.decals.setColorAt(dc, _c);
         dc++;
       }

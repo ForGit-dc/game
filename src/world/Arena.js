@@ -262,12 +262,12 @@ export class Arena extends Level {
       const band2 = new THREE.Mesh(new THREE.CylinderGeometry(1.26, 1.26, 0.06, 6), cap(color));
       band2.position.y = 0.4;
       g.add(band2);
-      const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.45), cap(color));
-      crystal.position.y = 3.1;
+      const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.32), this.mats.glow(color, 2));
+      crystal.position.y = 3.0;
       crystal.scale.y = 1.6;
       g.add(crystal);
       this.spinners.push({ obj: crystal, speed: 1.2, axis: 'y' });
-      this.bobbers.push({ obj: crystal, base: 3.1, amp: 0.15, speed: 1.5, phase: a * 3 });
+      this.bobbers.push({ obj: crystal, base: 3.0, amp: 0.15, speed: 1.5, phase: a * 3 });
       this.obstacles.push({ x, z, r: 1.3, stage, seg });
     }
   }
@@ -320,7 +320,7 @@ export class Arena extends Level {
       const r = rng.range(52, 70) + (south > 0.3 ? 16 : 0);
       const x = Math.cos(a) * r, z = Math.sin(a) * r;
       const w = rng.range(7, 13), d = rng.range(7, 13);
-      const top = south > 0.3 ? rng.range(-24, -10) : south > -0.3 ? rng.range(-6, 16) : rng.range(8, 42);
+      const top = south > 0.3 ? rng.range(-26, -12) : south > -0.35 ? rng.range(-16, -2) : rng.range(6, 40);
       const base = top - rng.range(45, 80);
       this.building({ x, z, base, w, d, h: top - base, variant: i % 3, trim: [C.CYAN, C.MAGENTA, C.VIOLET, C.ORANGE, C.TEAL][i % 5], roof: true });
       towers.push({ x, z, top, a, w, d, south });

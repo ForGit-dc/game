@@ -49,7 +49,12 @@ async function main() {
   ]);
   line('> glyph cache ........... ok', 'ok');
 
-  const game = new Game(document.getElementById('game'), { debug, lowQuality: params.has('lowq') });
+  const game = new Game(document.getElementById('game'), {
+  debug,
+  lowQuality: params.has('lowq'),
+  pixelRatio: params.has('pr') ? parseFloat(params.get('pr')) : null,
+  msaa: params.has('msaa') ? parseInt(params.get('msaa'), 10) : null,
+});
   if (debug) window.__game = game;
   try {
     await game.init((msg) => line(`> ${msg}`));

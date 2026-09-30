@@ -13,7 +13,7 @@ export function buildCourier({ holo = null } = {}) {
   const M = holo
     ? { armor: holo, dark: holo, joint: holo, glow: holo, accent: holo, blade: holo }
     : {
-        armor: new THREE.MeshStandardMaterial({ color: 0xe9eef8, roughness: 0.28, metalness: 0.3, envMapIntensity: 1.2 }),
+        armor: new THREE.MeshStandardMaterial({ color: 0xe9eef8, roughness: 0.28, metalness: 0.3, envMapIntensity: 1.4, emissive: 0x1a2a3a }),
         dark: new THREE.MeshStandardMaterial({ color: 0x191b27, roughness: 0.45, metalness: 0.75, envMapIntensity: 1.2 }),
         joint: new THREE.MeshStandardMaterial({ color: 0x3b4058, roughness: 0.35, metalness: 0.85 }),
         glow: new THREE.MeshBasicMaterial({ color: new THREE.Color('#22e6ff').multiplyScalar(4.5) }),

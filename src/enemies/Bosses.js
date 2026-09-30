@@ -189,7 +189,7 @@ export class HiveMother extends Boss {
     const core = new THREE.Mesh(new THREE.IcosahedronGeometry(2.0, 2), this.glow('#ff5a2a', 3));
     this.group.add(core);
     this.shell = new THREE.Group();
-    const ico = new THREE.IcosahedronGeometry(2.7, 1).toNonIndexed();
+    const ico = new THREE.IcosahedronGeometry(2.7, 1);
     const pos = ico.attributes.position;
     for (let f = 0; f < pos.count; f += 3) {
       const a = new THREE.Vector3().fromBufferAttribute(pos, f);

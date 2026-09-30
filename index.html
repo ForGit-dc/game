@@ -15,77 +15,63 @@
       <canvas id="game" tabindex="0"></canvas>
 
       <div id="ui">
-        <!-- world-space markers & floating numbers -->
-        <div id="markers"></div>
         <div id="dmgnums"></div>
 
         <!-- ============ HUD ============ -->
         <div id="hud" class="hidden">
-          <div class="hud-tl">
-            <div class="objective panel">
-              <div class="obj-label"><span class="obj-dot"></span>OBJECTIVE</div>
-              <div class="obj-text" id="obj-text">Recover Echo fragments</div>
-              <div class="obj-sub" id="obj-sub"></div>
+          <div class="xpbar"><div class="xp-fill" id="xp-fill"></div></div>
+          <div class="xp-lvl" id="xp-lvl">LV 1</div>
+
+          <div class="hud-top">
+            <div class="timer" id="timer">00:00</div>
+            <div class="next-ev" id="next-ev"></div>
+            <div class="bossbar hidden" id="bossbar">
+              <div class="bb-name" id="bb-name"></div>
+              <div class="bb-track"><div class="bb-ghost" id="bb-ghost"></div><div class="bb-fill" id="bb-fill"></div></div>
+              <div class="bb-title" id="bb-title"></div>
             </div>
-            <div class="log" id="log"></div>
+            <div class="warning" id="warning"></div>
+          </div>
+
+          <div class="hud-tl">
+            <div class="unit-id">K-7 <span>//</span> COURIER</div>
+            <div class="bar hp">
+              <div class="bar-icon"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z" /></svg></div>
+              <div class="bar-track"><div class="bar-ghost" id="hp-ghost"></div><div class="bar-fill" id="hp-fill"></div></div>
+              <span class="bar-val" id="hp-val">100</span>
+            </div>
+            <div class="bar sync">
+              <div class="bar-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" /><path d="M12 13V8M9 2h6" /></svg></div>
+              <div class="bar-track"><div class="bar-fill" id="sync-fill"></div></div>
+              <span class="bar-val" id="sync-val">0</span>
+            </div>
+            <div class="slots">
+              <div class="slot-row" id="w-slots"></div>
+              <div class="slot-row passive" id="p-slots"></div>
+            </div>
           </div>
 
           <div class="hud-tr">
-            <div class="echo-row" id="echo-row"></div>
-            <div class="stat-row">
-              <span class="lbl">THREAT</span>
-              <div class="danger" id="danger"><i></i><i></i><i></i><i></i><i></i></div>
-            </div>
-            <div class="stat-row">
-              <span class="lbl">CORE FAILURE</span>
-              <span class="core-val" id="core-val">61.0%</span>
-            </div>
-            <div class="stat-row score-row">
-              <span class="lbl">SCORE</span>
-              <span class="score-val" id="score-val">000000</span>
-            </div>
+            <div class="stat-row"><span class="lbl">KILLS</span><span class="val" id="kills">0</span></div>
+            <div class="stat-row"><span class="lbl">SCORE</span><span class="val" id="score">0</span></div>
+            <div class="stat-row"><span class="lbl">SHARDS</span><span class="val shards" id="shards">◆ 0</span></div>
+            <div class="combo" id="combo"><span id="combo-n"></span><small>COMBO</small></div>
           </div>
 
-          <div class="hud-tc hidden" id="timer-wrap">
-            <div class="timer-lbl">CITY COLLAPSE IN</div>
-            <div class="timer" id="timer">02:00.00</div>
-          </div>
-
-          <div class="hud-bl">
-            <div class="unit-id">K-7 <span>//</span> COURIER CLASS</div>
-            <div class="bar hp">
-              <div class="bar-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z" /></svg>
-              </div>
-              <div class="bar-track">
-                <div class="bar-ghost" id="hp-ghost"></div>
-                <div class="bar-fill" id="hp-fill"></div>
-              </div>
-              <span class="bar-val" id="hp-val">100</span>
-            </div>
-            <div class="bar en">
-              <div class="bar-icon">
-                <svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" /></svg>
-              </div>
-              <div class="bar-track">
-                <div class="bar-fill" id="en-fill"></div>
-              </div>
-              <span class="bar-val" id="en-val">100</span>
-            </div>
-          </div>
+          <div class="log" id="log"></div>
 
           <div class="hud-bc">
             <div class="ability" id="ab-dash">
               <div class="ab-cd"></div>
               <svg viewBox="0 0 24 24"><path d="M3 12h9M6 7h8M6 17h8M14 5l7 7-7 7" /></svg>
-              <div class="ab-key">SHIFT</div>
+              <div class="ab-key">SPACE</div>
               <div class="ab-name">DASH</div>
               <div class="ab-pips" id="dash-pips"></div>
             </div>
             <div class="ability" id="ab-blade">
               <div class="ab-cd"></div>
               <svg viewBox="0 0 24 24"><path d="M4 20 18 6l2-3-3 2L4 19zM7 14l3 3" /></svg>
-              <div class="ab-key">RMB / F</div>
+              <div class="ab-key">RMB</div>
               <div class="ab-name">BLADE</div>
             </div>
             <div class="ability ultimate" id="ab-over">
@@ -96,11 +82,7 @@
             </div>
           </div>
 
-          <div id="crosshair">
-            <i class="ch-t"></i><i class="ch-b"></i><i class="ch-l"></i><i class="ch-r"></i>
-            <b class="ch-dot"></b>
-          </div>
-          <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
+          <div id="reticle"><i></i><i></i><i></i><i></i><b></b></div>
           <div id="dmg-dir"></div>
 
           <div id="banner">
@@ -108,26 +90,14 @@
             <div class="banner-main" id="banner-main" data-text=""></div>
             <div class="banner-sub" id="banner-sub"></div>
           </div>
-
-          <div id="uplink" class="hidden">
-            <svg viewBox="0 0 120 120">
-              <circle class="ul-bg" cx="60" cy="60" r="52" />
-              <circle class="ul-fg" id="ul-ring" cx="60" cy="60" r="52" />
-            </svg>
-            <div class="ul-txt"><span id="ul-pct">0</span><small>UPLINK</small></div>
-          </div>
-
           <div id="prompt"></div>
-          <div id="lock-hint" class="hidden">CLICK TO SYNC NEURAL LINK</div>
         </div>
 
         <!-- ============ BOOT ============ -->
         <div id="boot" class="screen">
           <div class="boot-inner">
             <div class="boot-lines" id="boot-lines"></div>
-            <button class="boot-btn" id="boot-btn" disabled>
-              <span>INITIALIZING</span>
-            </button>
+            <button class="boot-btn" id="boot-btn" disabled><span>INITIALIZING</span></button>
             <div class="boot-note">best with headphones · mouse + keyboard</div>
           </div>
         </div>
@@ -135,32 +105,34 @@
         <!-- ============ MAIN MENU ============ -->
         <div id="menu" class="screen hidden">
           <div class="menu-left">
-            <div class="menu-kicker">SIGNAL 7 // FLOATING DISTRICT OF VASHTA</div>
+            <div class="menu-kicker">THE RING // ABOVE THE DROWNED CITY OF VASHTA</div>
             <h1 class="title glitch" data-text="NEON//ECHO">NEON<span>//</span>ECHO</h1>
-            <div class="tagline">A courier wakes in a falling city.</div>
+            <div class="tagline">Survive the fall. Ten minutes. Then the Warden wakes.</div>
             <nav class="menu-nav">
               <button class="mbtn" data-action="play"><span class="idx">01</span>PLAY</button>
-              <button class="mbtn" data-action="controls"><span class="idx">02</span>CONTROLS</button>
-              <button class="mbtn" data-action="credits"><span class="idx">03</span>CREDITS</button>
+              <button class="mbtn" data-action="lattice"><span class="idx">02</span>LATTICE <em id="menu-shards">◆ 0</em></button>
+              <button class="mbtn" data-action="controls"><span class="idx">03</span>CONTROLS</button>
+              <button class="mbtn" data-action="credits"><span class="idx">04</span>CREDITS</button>
             </nav>
-            <div class="menu-foot">BUILD 1.0 // UNIT K-7 // <span id="best-score">NO RECORD</span></div>
+            <button class="diff hidden" id="diff-btn" data-action="difficulty">MODE · <b id="diff-label">NORMAL</b></button>
+            <div class="menu-foot" id="menu-foot">UNIT K-7 // NO RECORD</div>
           </div>
 
           <div class="menu-panel panel hidden" id="panel-controls">
             <div class="panel-head">CONTROLS</div>
             <div class="keys">
               <div><kbd data-code="KeyW">W</kbd><kbd data-code="KeyA">A</kbd><kbd data-code="KeyS">S</kbd><kbd data-code="KeyD">D</kbd><span>Move</span></div>
-              <div><kbd>MOUSE</kbd><span>Camera / aim</span></div>
-              <div><kbd>SPACE</kbd><span>Jump · press again to double-jump</span></div>
-              <div><kbd>SHIFT</kbd><span>Tap: dash (invulnerable) · hold: sprint</span></div>
-              <div><kbd>LMB</kbd><span>Pulse blaster (hold)</span></div>
-              <div><kbd>RMB</kbd><kbd data-code="KeyF">F</kbd><span>Blade · deflects orange orbs</span></div>
-              <div><kbd data-code="KeyQ">Q</kbd><span>Overclock · slows time when SYNC is full</span></div>
+              <div><kbd>MOUSE</kbd><span>Aim</span></div>
+              <div><kbd>LMB</kbd><span>Pulse Blaster (hold) · <kbd>T</kbd> toggles auto-fire</span></div>
+              <div><kbd>SPACE</kbd><kbd>SHIFT</kbd><span>Dash — invulnerable. Get hit mid-dash = Perfect Dodge</span></div>
+              <div><kbd>RMB</kbd><kbd data-code="KeyF">F</kbd><span>Blade — cleaves, breaks shields, deflects orange orbs</span></div>
+              <div><kbd data-code="KeyQ">Q</kbd><span>Overclock when SYNC is full — time slows, damage ×1.5</span></div>
+              <div><kbd>WHEEL</kbd><span>Zoom</span></div>
               <div><kbd>ESC</kbd><kbd data-code="KeyP">P</kbd><span>Pause</span></div>
             </div>
             <div class="panel-tip">
-              Echoes grant augments. Recover 5 to open the Skylift.<br />
-              Cyan coolant pools recharge energy. Glowing pads launch you.
+              Level-ups offer weapons and passives. Max a weapon, own its paired passive, and a golden <b>EVOLUTION</b> card appears.<br />
+              Every run earns ◆ shards — spend them in the Lattice.
             </div>
             <button class="sbtn" data-action="back">BACK</button>
           </div>
@@ -168,39 +140,44 @@
           <div class="menu-panel panel hidden" id="panel-credits">
             <div class="panel-head">CREDITS</div>
             <div class="credits">
-              <p><b>Direction · Design · Code · Art · Audio</b><br />Claude, from a one-line brief: "surprise me"</p>
-              <p><b>Everything is procedural</b><br />Every mesh, texture and sound is generated at runtime. No asset files.</p>
+              <p><b>Direction · Design · Code · Art · Sound</b><br />Claude, from a one-line brief: "surprise me"</p>
+              <p><b>Everything is procedural</b><br />Every mesh, texture and sound is generated at runtime. No asset files. No music — only the storm.</p>
               <p><b>Built with</b><br />Three.js · Vite · Web Audio API</p>
               <p><b>Typefaces</b><br />Chakra Petch & Share Tech Mono (SIL Open Font License)</p>
             </div>
             <button class="sbtn" data-action="back">BACK</button>
           </div>
+
+          <div class="menu-panel panel wide hidden" id="panel-lattice">
+            <div class="panel-head">NEURAL LATTICE <span class="lat-shards" id="lat-shards">◆ 0</span></div>
+            <div class="lattice" id="lattice"></div>
+            <button class="sbtn" data-action="back">BACK</button>
+          </div>
         </div>
 
-        <!-- ============ AUGMENT CHOICE ============ -->
-        <div id="augment" class="screen hidden">
+        <!-- ============ LEVEL-UP CARDS ============ -->
+        <div id="cards" class="screen hidden">
           <div class="aug-head">
-            <div class="aug-kicker" id="aug-kicker">ECHO 01 INTEGRATED</div>
-            <div class="aug-title">SELECT AUGMENT</div>
+            <div class="aug-kicker" id="cards-kicker">DATA THRESHOLD REACHED</div>
+            <div class="aug-title" id="cards-title">LEVEL 2</div>
           </div>
-          <div class="aug-cards" id="aug-cards"></div>
-          <div class="aug-hint">MOVE MOUSE TO BROWSE · CLICK OR PRESS 1 / 2 / 3</div>
+          <div class="aug-cards" id="cards-list"></div>
+          <div class="aug-hint">
+            CLICK OR PRESS 1–4 · <button class="reroll" id="reroll-btn" data-action="reroll">↻ REROLL (R) <span id="reroll-n">0</span></button>
+          </div>
         </div>
 
         <!-- ============ PAUSE ============ -->
         <div id="pause" class="screen hidden">
           <div class="panel pause-panel">
             <div class="panel-head">SYSTEM PAUSED</div>
+            <div class="pause-build" id="pause-build"></div>
             <button class="sbtn" data-action="resume">RESUME</button>
             <button class="sbtn" data-action="restart">RESTART RUN</button>
-            <button class="sbtn" data-action="quit">MAIN MENU</button>
+            <button class="sbtn" data-action="quit">ABANDON · MAIN MENU</button>
             <div class="settings">
-              <label>MOUSE SENSITIVITY <input type="range" id="set-sens" min="0.2" max="2.5" step="0.05" value="1" /></label>
               <label>MASTER VOLUME <input type="range" id="set-vol" min="0" max="1" step="0.01" value="0.8" /></label>
-              <label class="chk"><input type="checkbox" id="set-invert" /> INVERT Y</label>
-            </div>
-            <div class="pause-help">
-              <span data-keylabel="KeyW">W</span><span data-keylabel="KeyA">A</span><span data-keylabel="KeyS">S</span><span data-keylabel="KeyD">D</span> move · SPACE jump · SHIFT dash/sprint · LMB fire · RMB/F blade · <span data-keylabel="KeyQ">Q</span> overclock
+              <label class="chk"><input type="checkbox" id="set-auto" /> AUTO-FIRE (T)</label>
             </div>
           </div>
         </div>
@@ -211,9 +188,12 @@
             <div class="end-kicker">CONNECTION TERMINATED</div>
             <h2 class="end-title glitch red" data-text="SIGNAL LOST">SIGNAL LOST</h2>
             <div class="end-reason" id="go-reason"></div>
+            <div class="end-shards" id="go-shards"></div>
             <div class="end-stats" id="go-stats"></div>
+            <div class="end-build" id="go-build"></div>
             <div class="end-btns">
-              <button class="sbtn" data-action="restart">REBOOT</button>
+              <button class="sbtn primary" data-action="restart">REBOOT</button>
+              <button class="sbtn" data-action="to-lattice">LATTICE</button>
               <button class="sbtn" data-action="quit">MAIN MENU</button>
             </div>
           </div>
@@ -222,14 +202,17 @@
         <!-- ============ VICTORY ============ -->
         <div id="victory" class="screen hidden">
           <div class="end-inner">
-            <div class="end-kicker">UPLINK COMPLETE</div>
-            <h2 class="end-title glitch gold" data-text="DELIVERY COMPLETE">DELIVERY COMPLETE</h2>
-            <div class="end-reason" id="vic-reason">The package was you. You arrived.</div>
+            <div class="end-kicker">THE WARDEN HAS FALLEN</div>
+            <h2 class="end-title glitch gold" data-text="SIGNAL SURVIVED">SIGNAL SURVIVED</h2>
+            <div class="end-reason" id="vic-reason"></div>
             <div class="rank" id="vic-rank">A</div>
+            <div class="end-shards" id="vic-shards"></div>
             <div class="end-stats" id="vic-stats"></div>
+            <div class="end-build" id="vic-build"></div>
             <div class="end-btns">
-              <button class="sbtn" data-action="restart">RUN AGAIN</button>
-              <button class="sbtn" data-action="quit">MAIN MENU</button>
+              <button class="sbtn primary" data-action="continue" id="vic-continue">CONTINUE · ENDLESS</button>
+              <button class="sbtn" data-action="restart">NEW RUN</button>
+              <button class="sbtn" data-action="to-lattice">LATTICE</button>
             </div>
           </div>
         </div>
