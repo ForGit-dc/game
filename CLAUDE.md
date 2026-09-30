@@ -10,14 +10,14 @@ Read it fully before touching code.
 - **NO MUSIC. Ever.** Music is haram for the user. No melodic score, no chord/arpeggio jingles, no melodic stingers, no ambience made of random notes.
   Allowed: rain, thunder, wind, city hum, non-melodic SFX (single-tone blips, sweeps, noise hits). Background ambience = **rain + thunder** (already implemented).
 - **Commit AND push by yourself, regularly** ("push au fur et à mesure", "commit et push toi même"). Push after every meaningful milestone.
-  Work happens on branch **`neon-echo`** (repo `ForGit-dc/game`, default branch `main`). Tell the user they can merge / offer a PR at the end.
+  The user asked to **push to `main`** ("push dans le main"): `neon-echo` was fast-forwarded into `main` and work now continues directly on `main` (repo `ForGit-dc/game`).
 - The user plays on a high-DPI laptop (screenshot was 2576px wide, AZERTY keyboard). They once saw a **black screen** (fixed: see "Rendering pitfalls").
 - Hard constraint: must run with `npm install && npm run dev`. No backend, no API keys, no downloaded assets. Everything procedural.
 - Commit message trailer: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 
 ## Current status (read this!)
 
-**v2 — 3D neon roguelite horde-survival — is DONE and playable** (branch `neon-echo`, pushed). v1 (exploration game) was removed.
+**v2 — 3D neon roguelite horde-survival — is DONE and playable** (on `main`, pushed). v1 (exploration game) was removed.
 Verified headless: full loop (drop-in → waves → level-up cards → Hive Mother → ring collapse → Warden phases/Core Lance → victory → endless → death → shards → Lattice buy), all 6 weapons + evolutions, chests/rerolls, meteors, blackout, revive, overdrive. ~5 ms/frame JS with 350 drones.
 
 Files (all live): `game/{Game,TopCamera,Input}.js`, `player/{Player,PlayerModel}.js`, `enemies/{Horde,Bosses}.js`, `combat/{Projectiles,Weapons}.js`, `systems/{Progression,Loot,Waves,Meta}.js`, `world/{Arena,Level,Sky,Skyline,Weather,Materials,Textures}.js`, `fx/*`, `audio/Audio.js`, `ui/UI.js`.
@@ -25,7 +25,7 @@ Files (all live): `game/{Game,TopCamera,Input}.js`, `player/{Player,PlayerModel}
 
 Audio: user said the first storm sounded "fake et agaçant" → rewritten as **pre-rendered buffers** (`_renderRain` droplet synthesis, `_renderThunder` rumble bank + near crack), thunder throttled (≥2.5 s apart) and lightning much rarer (14–36 s), ambience slider in pause (`localStorage neon-echo-amb`). If the user still dislikes it, lower/disable thunder first.
 
-Possible next steps: real-GPU playtest feedback from the user, balance tuning (spawn rate in `Waves.update`, xp curve `xpToNext`), more enemy variety/bosses, stripping `Level.build()`, offering a PR `neon-echo → main`.
+Possible next steps: real-GPU playtest feedback from the user, balance tuning (spawn rate in `Waves.update`, xp curve `xpToNext`), more enemy variety/bosses, stripping `Level.build()`.
 
 ## v2 game design (implemented)
 
