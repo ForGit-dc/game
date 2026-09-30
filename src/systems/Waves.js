@@ -28,7 +28,7 @@ export class Waves {
     this.events = TIMELINE.map((e) => ({ ...e, done: false, warned: false }));
     this.active = [];
     this.eliteT = 90;
-    this.surgeT = 50;
+    this.surgeT = 40;
     this.magnetT = 100;
     this.meteorT = 0;
     this.endless = false;
@@ -103,7 +103,7 @@ export class Waves {
 
     const bossActive = g.bosses.length > 0;
     // regular spawns
-    const rate = (0.9 + 0.55 * m) * this.diff.rate * (bossActive ? 0.35 : 1) * (this.endless ? 1.3 : 1);
+    const rate = (1.5 + 0.55 * m) * this.diff.rate * (bossActive ? 0.35 : 1) * (this.endless ? 1.3 : 1);
     const maxAlive = Math.min(420, Math.floor((40 + 16 * m) * (bossActive ? 0.6 : 1) * this.diff.rate));
     this.acc += rate * dt;
     let guard = 0;

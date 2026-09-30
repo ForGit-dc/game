@@ -201,8 +201,8 @@ class Orbit extends Weapon {
     this.hitAt = new Map();
     this.angle = 0;
     this.geo = new THREE.OctahedronGeometry(0.28, 0);
-    this.mat = new THREE.MeshBasicMaterial({ color: new THREE.Color('#ff5ae0').multiplyScalar(4) });
-    this.mat2 = new THREE.MeshBasicMaterial({ color: new THREE.Color('#7ff6ff').multiplyScalar(4) });
+    this.mat = new THREE.MeshBasicMaterial({ color: new THREE.Color('#ff5ae0').multiplyScalar(2.4) });
+    this.mat2 = new THREE.MeshBasicMaterial({ color: new THREE.Color('#7ff6ff').multiplyScalar(2.4) });
     this.blades = [];
     this.onChange();
   }
@@ -240,7 +240,7 @@ class Orbit extends Weapon {
       const x = p.x + Math.cos(a) * r, z = p.z + Math.sin(a) * r;
       b.mesh.position.set(x, 1.1, z);
       b.mesh.rotation.set(0, -a + (ring.dir > 0 ? 0 : Math.PI), 0);
-      if (Math.random() < 0.25) g.particles.spawn(x, 1.1, z, 0, 0, 0, 0.25, 0.18, 0, _c.copy(ring.mat.color).multiplyScalar(0.5), _c2.set(0, 0, 0), 0, 0);
+      if (Math.random() < 0.15) g.particles.spawn(x, 1.1, z, 0, 0, 0, 0.2, 0.12, 0, _c.copy(ring.mat.color).multiplyScalar(0.35), _c2.set(0, 0, 0), 0, 0);
       g.horde.forEachNear(x, z, 0.55 * S.areaMul, (e) => {
         const key = e.id * 16 + (ring.dir > 0 ? 0 : 1);
         if ((this.hitAt.get(key) || 0) > now) return;

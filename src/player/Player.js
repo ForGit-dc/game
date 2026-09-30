@@ -13,13 +13,18 @@ export class Player {
     this.model.group.scale.setScalar(1.25); // read clearly from the high camera
     game.scene.add(this.model.group);
     this.scarf = new Scarf(game.scene);
-    this.light = new THREE.PointLight('#7ff6ff', 16, 10, 1.6);
+    this.light = new THREE.PointLight('#7ff6ff', 5, 7, 1.8);
     this.light.position.set(0, 2.6, 0.8);
     this.model.group.add(this.light);
     // floor marker so the courier never gets lost in the crowd
     this.marker = new THREE.Group();
-    const ringMat = new THREE.MeshBasicMaterial({ color: new THREE.Color('#22e6ff').multiplyScalar(2.2), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
-    const ring = new THREE.Mesh(new THREE.RingGeometry(0.72, 0.82, 48), ringMat);
+    const ringMat = new THREE.MeshBasicMaterial({ color: new THREE.Color('#9ff8ff').multiplyScalar(1.4), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    // dark contact disc: separates the courier from the glowing floor
+    const shadow = new THREE.Mesh(new THREE.CircleGeometry(1.25, 40), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.55, depthWrite: false }));
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = -0.01;
+    this.marker.add(shadow);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.98, 1.05, 56), ringMat);
     ring.rotation.x = -Math.PI / 2;
     this.marker.add(ring);
     const tick = new THREE.Mesh(new THREE.RingGeometry(0.9, 1.0, 3, 1, -0.22, 0.44), ringMat);
@@ -34,7 +39,7 @@ export class Player {
     chev.closePath();
     const chevMesh = new THREE.Mesh(new THREE.ShapeGeometry(chev), new THREE.MeshBasicMaterial({ color: new THREE.Color('#ff5ae0').multiplyScalar(2.5), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
     chevMesh.rotation.x = -Math.PI / 2;
-    chevMesh.position.z = 1.35;
+    chevMesh.position.z = 1.55;
     this.aimMarker.add(chevMesh);
     this.marker.add(this.aimMarker);
     void tick;
@@ -236,7 +241,7 @@ export class Player {
       turn: clamp(turn, -8, 8),
     });
     this.model.M.armor.emissive?.setRGB(0.012 + this.hitFlash * 3, 0.025 + this.hitFlash * 0.3, 0.045 + this.hitFlash * 0.5);
-    this.light.intensity = 16 + (this.overT > 0 ? 10 : 0);
+    this.light.intensity = 5 + (this.overT > 0 ? 4 : 0);
     this.light.color.set(this.overT > 0 ? '#ffd36b' : '#7ff6ff');
 
     this.marker.position.set(this.pos.x, 0.05, this.pos.z);

@@ -70,7 +70,7 @@ export class Effects {
     // --- muzzle flash sprite ---
     const mf = new THREE.SpriteMaterial({
       map: radialTexture(),
-      color: new THREE.Color('#9ff8ff').multiplyScalar(4),
+      color: new THREE.Color('#9ff8ff').multiplyScalar(2.5),
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       transparent: true,

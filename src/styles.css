@@ -1385,6 +1385,7 @@ input[type='checkbox'] {
    v2 — THE RING (survivor HUD)
    ===================================================================== */
 body.playing #game { cursor: none; }
+body:not(.playing) #hud .hud-bc { opacity: 0.12; }
 
 .xpbar {
   position: absolute; top: 0; left: 0; right: 0; height: 6px;
@@ -1550,3 +1551,49 @@ body.playing #game { cursor: none; }
 .end-shards small { color: var(--muted); }
 .sbtn.primary { background: rgba(34, 230, 255, 0.18); border-color: var(--cyan); }
 .end-stats { grid-template-columns: 1fr 1fr; }
+
+/* --- menu panels float on the right, the title dims behind wide panels --- */
+#menu .menu-panel {
+  position: absolute;
+  right: 5vw;
+  top: 50%;
+  transform: translateY(-50%);
+  max-height: 88vh;
+  overflow-y: auto;
+  z-index: 2;
+  animation: panelIn2 0.35s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+@keyframes panelIn2 {
+  from { opacity: 0; transform: translate(30px, -50%); }
+  to { opacity: 1; transform: translate(0, -50%); }
+}
+#menu .menu-panel.wide { width: min(700px, 62vw); }
+#menu.wide-open .menu-left { opacity: 0.18; transition: opacity 0.3s; }
+@media (max-width: 1000px) {
+  .lattice { grid-template-columns: 1fr; }
+  #menu .menu-panel { width: min(520px, 90vw); right: 5vw; }
+}
+
+/* --- short screens (e.g. 1288×594 laptops): compact end screens, cards and HUD --- */
+#gameover, #victory { overflow-y: auto; padding: 24px 0; align-items: flex-start; }
+#gameover .end-inner, #victory .end-inner { margin: auto; }
+@media (max-height: 760px) {
+  .end-title { font-size: clamp(34px, 5.5vw, 64px); }
+  .end-kicker { font-size: 11px; }
+  .end-reason { margin-top: 4px; font-size: 14px; }
+  .end-shards { margin-top: 8px; font-size: 14px; }
+  .end-stats { margin-top: 12px; gap: 2px 26px; font-size: 13px; }
+  .end-stats div { padding: 2px 0; }
+  .end-stats div.total { font-size: 16px; margin-top: 2px; }
+  .end-build { margin-top: 10px; }
+  .rank { width: 60px; height: 60px; line-height: 60px; font-size: 34px; margin-top: 8px; }
+  .end-btns { margin-top: 14px; display: flex; gap: 8px; width: min(620px, 92vw); }
+  .end-btns .sbtn { margin-top: 0; }
+  .aug-cards { margin-top: 18px; }
+  .aug-card { height: 260px; }
+  .aug-card .ac-glyph { margin: 16px auto 12px; width: 52px; height: 52px; }
+  .aug-title { font-size: 32px; }
+  .hud-top .timer { font-size: 34px; }
+  #hud .hud-tl .slots { margin-top: 8px; }
+  .ability { width: 56px; height: 56px; }
+}

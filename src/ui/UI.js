@@ -70,6 +70,7 @@ export class UI {
 
   panel(name) {
     for (const p of ['controls', 'credits', 'lattice']) $(`panel-${p}`).classList.toggle('hidden', p !== name);
+    this.el.menu.classList.toggle('wide-open', name === 'lattice');
     if (name === 'lattice') this.renderLattice();
   }
 

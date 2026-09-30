@@ -166,7 +166,7 @@ export class Horde {
     telGeo.translate(0, 0, 0.5);
     this.telegraphs = new THREE.InstancedMesh(
       telGeo,
-      new THREE.MeshBasicMaterial({ color: new THREE.Color('#ff2bd6').multiplyScalar(2), transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }),
+      new THREE.MeshBasicMaterial({ color: new THREE.Color('#ff2bd6').multiplyScalar(1.2), transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false }),
       80,
     );
     this.telegraphs.frustumCulled = false;
