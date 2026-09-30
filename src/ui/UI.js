@@ -44,6 +44,15 @@ export class UI {
       if (e.target.closest?.('[data-action], .aug-card')) g.audio.uiHover();
     });
     $('set-vol').addEventListener('input', (e) => g.audio.setVolume(parseFloat(e.target.value)));
+    $('set-amb').addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      g.audio.setAmbience(v);
+      try {
+        localStorage.setItem('neon-echo-amb', String(v));
+      } catch {
+        /* ignore */
+      }
+    });
     $('set-auto').addEventListener('change', (e) => {
       g.settings.autoFire = e.target.checked;
       try {
@@ -418,6 +427,7 @@ export class UI {
 
   syncSettings() {
     $('set-auto').checked = this.game.settings.autoFire;
+    if (this.game.audio.ambience !== undefined) $('set-amb').value = String(this.game.audio.ambience);
   }
 
   buildHtml({ weapons, passives }) {

@@ -44,7 +44,7 @@ export class AudioEngine {
     this.sfxFilter.connect(this.master);
 
     this.ambBus = ctx.createGain();
-    this.ambBus.gain.value = 0.7;
+    this.ambBus.gain.value = 0.55;
     this.ambFilter = ctx.createBiquadFilter();
     this.ambFilter.type = 'lowpass';
     this.ambFilter.frequency.value = 20000;
@@ -428,62 +428,39 @@ export class AudioEngine {
 
   lightning() {
     if (!this.ready) return;
-    this.thunder(0.25 + Math.random() * 2.2, 0.55 + Math.random() * 0.6);
+    // most strikes are far away: delayed, soft and dark
+    this.thunder(0.6 + Math.random() * 2.4, 0.35 + Math.random() * 0.45);
   }
 
-  /** Rolling thunder: optional close crack, then a long brown-noise rumble with random swells. */
+  /** Rolling thunder from pre-rendered buffers (crack + rumble bank). power ≈ 0.3 (far) … 1.4 (overhead). */
   thunder(delay = 0, power = 1) {
-    if (!this.ready) return;
+    if (!this.ready || !this.thunderBufs?.length) return;
+    if (this._throttle('thunder', 2500)) return;
     const ctx = this.ctx;
     const t0 = ctx.currentTime + delay;
-    const pan = ctx.createStereoPanner();
-    pan.pan.value = (Math.random() - 0.5) * 1.2;
-    pan.connect(this.ambBus);
-    const rs = ctx.createGain();
-    rs.gain.value = 0.5;
-    pan.connect(rs);
-    rs.connect(this.revSend);
-    if (power > 0.9 || Math.random() < 0.35) {
-      // crack
-      const c = ctx.createBufferSource();
-      c.buffer = this.noiseBuf;
-      const hp = ctx.createBiquadFilter();
-      hp.type = 'highpass';
-      hp.frequency.value = 900;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(0.5 * power, t0 + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.35);
-      c.connect(hp);
-      hp.connect(g);
-      g.connect(pan);
-      c.start(t0, Math.random());
-      c.stop(t0 + 0.4);
-    }
-    const dur = 3 + Math.random() * 3 * power;
+    const near = power > 0.95 && this.thunderNear;
+    const buf = near ? this.thunderNear : this.thunderBufs[Math.floor(Math.random() * this.thunderBufs.length)];
     const src = ctx.createBufferSource();
-    src.buffer = this.brownBuf;
-    src.loop = true;
+    src.buffer = buf;
+    src.playbackRate.value = near ? 0.95 + Math.random() * 0.1 : 0.8 + Math.random() * 0.25;
     const lp = ctx.createBiquadFilter();
     lp.type = 'lowpass';
-    lp.frequency.setValueAtTime(900 * power + 200, t0);
-    lp.frequency.exponentialRampToValueAtTime(90, t0 + dur);
+    lp.frequency.value = near ? 9000 : 900 + power * 2600;
+    lp.Q.value = 0.5;
     const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t0);
-    let tt = t0 + 0.05;
-    g.gain.exponentialRampToValueAtTime(0.9 * power, tt);
-    while (tt < t0 + dur - 0.4) {
-      tt += 0.2 + Math.random() * 0.6;
-      g.gain.exponentialRampToValueAtTime(Math.max(0.05, (0.2 + Math.random() * 0.8) * power * (1 - (tt - t0) / dur)), tt);
-    }
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    g.gain.value = Math.min(1, 0.7 * power);
+    const pan = ctx.createStereoPanner();
+    pan.pan.value = (Math.random() - 0.5) * (near ? 0.4 : 1.1);
     src.connect(lp);
     lp.connect(g);
     g.connect(pan);
-    src.start(t0, Math.random() * 1.5);
-    src.stop(t0 + dur + 0.1);
+    pan.connect(this.ambBus);
+    const rs = ctx.createGain();
+    rs.gain.value = near ? 0.15 : 0.3;
+    pan.connect(rs);
+    rs.connect(this.revSend);
+    src.start(t0);
   }
-
 
   warningBeep(n = 1) {
     if (!this.ready) return;
@@ -644,7 +621,6 @@ export class AudioEngine {
     this._tone(o.node, { type: 'sawtooth', f: 60, f2: 1600, dur: 1.2, vol: 0.08, a: 0.3 });
     this._noise(o.node, { dur: 1.4, vol: 0.2, type: 'bandpass', f: 300, f2: 9000, q: 1.5, a: 0.6 });
     this._tone(o.node, { type: 'sine', f: 55, f2: 30, t: 1.1, dur: 0.8, vol: 0.45 });
-    this.thunder(1.1, 0.6);
   }
 
   meteor() {
@@ -668,133 +644,232 @@ export class AudioEngine {
 
   // ================================================================ the storm
 
-  _loopNoise(buf, type, freq, q, vol, pan, dest) {
+  /** Ambience volume (rain, wind, thunder), 0..1. */
+  setAmbience(v) {
+    this.ambience = v;
+    if (this.ambBus) this.ambBus.gain.setTargetAtTime(0.9 * v, this.ctx.currentTime, 0.1);
+  }
+
+  /**
+   * Loopable stereo rain: a soft pink-noise bed plus thousands of individual droplets
+   * (short decaying noise bursts, power-law sizes, random pan and brightness). No tones.
+   */
+  _renderRain(seconds, density, bright) {
+    const ctx = this.ctx;
+    const sr = ctx.sampleRate;
+    const n = Math.floor(sr * seconds);
+    const buf = ctx.createBuffer(2, n, sr);
+    const L = buf.getChannelData(0), R = buf.getChannelData(1);
+    for (const d of [L, R]) {
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+      for (let i = 0; i < n; i++) {
+        const w = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + w * 0.0555179;
+        b1 = 0.99332 * b1 + w * 0.0750759;
+        b2 = 0.969 * b2 + w * 0.153852;
+        b3 = 0.8665 * b3 + w * 0.3104856;
+        b4 = 0.55 * b4 + w * 0.5329522;
+        b5 = -0.7616 * b5 - w * 0.016898;
+        d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.03;
+        b6 = w * 0.115926;
+      }
+    }
+    const count = Math.floor(density * seconds);
+    for (let k = 0; k < count; k++) {
+      const start = Math.floor(Math.random() * n);
+      const size = Math.pow(Math.random(), 2.4);
+      const amp = 0.05 + size * 0.6;
+      const len = Math.floor(sr * (0.0012 + size * 0.006 + Math.random() * 0.002));
+      const decay = Math.exp(-4 / len);
+      const pan = Math.random();
+      const gl = Math.sqrt(1 - pan) * amp, gr = Math.sqrt(pan) * amp;
+      const a = Math.min(0.9, 0.08 + Math.random() * 0.5 * bright);
+      let y = 0, env = 1;
+      for (let j = 0; j < len; j++) {
+        y += a * ((Math.random() * 2 - 1) * env - y);
+        env *= decay;
+        const idx = (start + j) % n;
+        L[idx] += y * gl;
+        R[idx] += y * gr;
+      }
+    }
+    // remove rumble / DC, then normalise
+    const c = Math.exp((-2 * Math.PI * 140) / sr);
+    let peak = 1e-6;
+    for (const d of [L, R]) {
+      let px = d[n - 1], py = 0;
+      for (let i = 0; i < n; i++) {
+        const x = d[i];
+        py = c * (py + x - px);
+        px = x;
+        d[i] = py;
+        const ab = py < 0 ? -py : py;
+        if (ab > peak) peak = ab;
+      }
+    }
+    const k = 0.7 / peak;
+    for (const d of [L, R]) for (let i = 0; i < n; i++) d[i] *= k;
+    return buf;
+  }
+
+  /**
+   * Thunder: many overlapping rumble swells shaped from brown noise through a lowpass that
+   * closes over time (energy loss with distance), stereo-offset; `near` adds the initial crack.
+   */
+  _renderThunder(seconds, near) {
+    const ctx = this.ctx;
+    const sr = ctx.sampleRate;
+    const n = Math.floor(sr * seconds);
+    const buf = ctx.createBuffer(2, n, sr);
+    const env = new Float32Array(n + 2048);
+    const events = near ? 46 : 30;
+    for (let e = 0; e < events; e++) {
+      const t = Math.pow(Math.random(), 1.7) * seconds * 0.7 + (near ? 0.02 : 0.15);
+      const amp = Math.pow(Math.max(0, 1 - t / seconds), 1.6) * (0.25 + 0.75 * Math.random());
+      const att = Math.floor(sr * (0.03 + Math.random() * 0.12));
+      const dec = sr * (0.2 + Math.random() * 0.9);
+      const s0 = Math.floor(t * sr);
+      const endI = Math.min(n, s0 + att + Math.floor(dec * 4));
+      const k = Math.exp(-1 / dec);
+      let v = amp;
+      for (let i = s0; i < endI; i++) {
+        if (i < s0 + att) env[i] += (amp * (i - s0)) / att;
+        else { env[i] += v; v *= k; }
+      }
+    }
+    const f0 = near ? 2600 : 900;
+    for (let ch = 0; ch < 2; ch++) {
+      const d = buf.getChannelData(ch);
+      const off = ch ? Math.floor(sr * 0.009) : 0;
+      let b = 0, y1 = 0, y2 = 0, a = 0;
+      for (let i = 0; i < n; i++) {
+        if ((i & 127) === 0) {
+          const f = f0 * Math.pow(1 - i / n, 2.2) + 55;
+          a = 1 - Math.exp((-2 * Math.PI * f) / sr);
+        }
+        const w = Math.random() * 2 - 1;
+        b = (b + 0.02 * w) / 1.02;
+        const src = b * 3.5 + w * 0.08;
+        y1 += a * (src - y1);
+        y2 += a * (y1 - y2);
+        const ei = i - off;
+        d[i] = y2 * (ei >= 0 ? env[ei] : 0);
+      }
+    }
+    if (near) {
+      // the crack: a bright, slightly clipped burst, then a short low boom
+      const start = Math.floor(sr * 0.01);
+      const len = Math.floor(sr * 0.09);
+      for (let ch = 0; ch < 2; ch++) {
+        const d = buf.getChannelData(ch);
+        let hp = 0, prev = 0;
+        for (let j = 0; j < len; j++) {
+          const w = Math.random() * 2 - 1;
+          hp = 0.9 * (hp + w - prev);
+          prev = w;
+          const e = Math.exp(-j / (sr * 0.018));
+          d[start + j] += Math.tanh(hp * 2.2) * e * 0.9;
+        }
+      }
+    }
+    let peak = 1e-6;
+    for (let ch = 0; ch < 2; ch++) {
+      const d = buf.getChannelData(ch);
+      for (let i = 0; i < n; i++) { const ab = Math.abs(d[i]); if (ab > peak) peak = ab; }
+    }
+    const k = 0.9 / peak;
+    for (let ch = 0; ch < 2; ch++) {
+      const d = buf.getChannelData(ch);
+      for (let i = 0; i < n; i++) d[i] *= k;
+      // fade the tail to silence
+      const fade = Math.floor(sr * 0.5);
+      for (let i = 0; i < fade; i++) d[n - 1 - i] *= i / fade;
+    }
+    return buf;
+  }
+
+  _loopBuffer(buf, { rate = 1, lowpass = 20000, highpass = 20, vol = 0.3, dest }) {
     const ctx = this.ctx;
     const src = ctx.createBufferSource();
     src.buffer = buf;
     src.loop = true;
-    const f = ctx.createBiquadFilter();
-    f.type = type;
-    f.frequency.value = freq;
-    f.Q.value = q;
+    src.playbackRate.value = rate;
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = highpass;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = lowpass;
     const g = ctx.createGain();
-    g.gain.value = vol;
-    const p = ctx.createStereoPanner();
-    p.pan.value = pan;
-    src.connect(f);
-    f.connect(g);
-    g.connect(p);
-    p.connect(dest);
-    src.start(0, Math.random() * 1.8);
-    return { src, f, g };
+    g.gain.value = 0;
+    src.connect(hp);
+    hp.connect(lp);
+    lp.connect(g);
+    g.connect(dest);
+    src.start(0, Math.random() * buf.duration);
+    g.gain.setTargetAtTime(vol, ctx.currentTime, 1.2);
+    return { src, lp, g, vol };
   }
 
   _startStorm() {
     const ctx = this.ctx;
-    const bus = this.ambBus;
-    // rain bed: two decorrelated layers, wide stereo
-    this.rainL = this._loopNoise(this.noiseBuf, 'bandpass', 2400, 0.35, 0.16, -0.7, bus);
-    this.rainR = this._loopNoise(this.noiseBuf, 'bandpass', 2900, 0.35, 0.16, 0.7, bus);
-    this.rainHiss = this._loopNoise(this.noiseBuf, 'highpass', 6500, 0.5, 0.05, 0, bus);
-    // heavy downpour body
-    this.rainBody = this._loopNoise(this.brownBuf, 'lowpass', 900, 0.5, 0.35, 0, bus);
-    // wind with slow gusts
-    this.wind = this._loopNoise(this.noiseBuf, 'lowpass', 420, 0.7, 0.12, 0, bus);
-    const lfo = ctx.createOscillator();
-    lfo.frequency.value = 0.06;
-    const lfoG = ctx.createGain();
-    lfoG.gain.value = 260;
-    lfo.connect(lfoG);
-    lfoG.connect(this.wind.f.frequency);
-    lfo.start();
-    const lfo2 = ctx.createOscillator();
-    lfo2.frequency.value = 0.045;
-    const lfo2G = ctx.createGain();
-    lfo2G.gain.value = 0.07;
-    lfo2.connect(lfo2G);
-    lfo2G.connect(this.wind.g.gain);
-    lfo2.start();
-    // city hum far below the clouds
-    const hum = ctx.createOscillator();
-    hum.frequency.value = 48;
-    const humG = ctx.createGain();
-    humG.gain.value = 0.025;
-    hum.connect(humG);
-    humG.connect(bus);
-    hum.start();
-
+    let amb = 0.6;
+    try {
+      const v = localStorage.getItem('neon-echo-amb');
+      if (v !== null) amb = parseFloat(v);
+    } catch {
+      /* no storage */
+    }
+    this.setAmbience(amb);
     this.stormLevel = 0.6;
-    // droplets on metal, gutter drips
-    this._dropT = setInterval(() => this._drops(), 50);
-    // background thunder even when no lightning is on screen
-    this._thunderT = setInterval(() => {
-      if (this.ctx.state === 'running' && Math.random() < 0.35) this.thunder(Math.random(), 0.25 + Math.random() * 0.3);
-    }, 6000);
+    // wind: dark, slowly gusting noise (the only continuous element that isn't rain)
+    const wind = ctx.createBufferSource();
+    wind.buffer = this.brownBuf;
+    wind.loop = true;
+    const wf = ctx.createBiquadFilter();
+    wf.type = 'lowpass';
+    wf.frequency.value = 380;
+    const wg = ctx.createGain();
+    wg.gain.value = 0.1;
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 0.05;
+    const lfoG = ctx.createGain();
+    lfoG.gain.value = 0.06;
+    lfo.connect(lfoG);
+    lfoG.connect(wg.gain);
+    wind.connect(wf);
+    wf.connect(wg);
+    wg.connect(this.ambBus);
+    wind.start(0, Math.random());
+    lfo.start();
+    this.wind = { f: wf, g: wg };
+    // render the rain & thunder banks off the click handler, in small steps
+    const jobs = [
+      () => { this.rainNear = this._loopBuffer(this._renderRain(5.3, 1900, 1), { highpass: 300, lowpass: 8000, vol: 0.36, dest: this.ambBus }); },
+      () => { this.rainFar = this._loopBuffer(this._renderRain(6.1, 3600, 0.35), { rate: 0.72, highpass: 120, lowpass: 3200, vol: 0.42, dest: this.ambBus }); },
+      () => { this.thunderBufs = [this._renderThunder(7.5, false)]; },
+      () => { this.thunderBufs.push(this._renderThunder(9, false)); },
+      () => { this.thunderNear = this._renderThunder(8, true); },
+    ];
+    const run = () => {
+      const job = jobs.shift();
+      if (!job) return;
+      job();
+      setTimeout(run, 30);
+    };
+    setTimeout(run, 60);
   }
 
-  _drops() {
-    if (!this.ready || this.ctx.state !== 'running') return;
-    const ctx = this.ctx;
-    const n = Math.floor(this.stormLevel * 4 + Math.random() * 2);
-    for (let i = 0; i < n; i++) {
-      const t = ctx.currentTime + Math.random() * 0.05;
-      const s = ctx.createBufferSource();
-      s.buffer = this.noiseBuf;
-      const f = ctx.createBiquadFilter();
-      f.type = 'bandpass';
-      f.frequency.value = 2500 + Math.random() * 5500;
-      f.Q.value = 6 + Math.random() * 10;
-      const g = ctx.createGain();
-      const v = 0.02 + Math.random() * 0.06;
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(v, t + 0.002);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.012 + Math.random() * 0.02);
-      const p = ctx.createStereoPanner();
-      p.pan.value = Math.random() * 2 - 1;
-      s.connect(f);
-      f.connect(g);
-      g.connect(p);
-      p.connect(this.ambBus);
-      s.start(t, Math.random() * 1.9);
-      s.stop(t + 0.05);
-    }
-    if (Math.random() < 0.05) {
-      // heavier drip from a gutter
-      const t = ctx.currentTime;
-      const o = ctx.createOscillator();
-      o.type = 'sine';
-      const f0 = 500 + Math.random() * 500;
-      o.frequency.setValueAtTime(f0, t);
-      o.frequency.exponentialRampToValueAtTime(f0 * 0.45, t + 0.06);
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.035, t + 0.004);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
-      const p = ctx.createStereoPanner();
-      p.pan.value = Math.random() * 1.6 - 0.8;
-      o.connect(g);
-      g.connect(p);
-      p.connect(this.ambBus);
-      const rs = ctx.createGain();
-      rs.gain.value = 0.3;
-      p.connect(rs);
-      rs.connect(this.revSend);
-      o.start(t);
-      o.stop(t + 0.1);
-    }
-  }
-
-  /** Storm intensity instead of music: -1 menu, 0 calm, 1..3 building up to the collapse. */
+  /** Storm intensity: -1 menu, 0 calm, 1..3 building up to the bosses. */
   setIntensity(level) {
     if (!this.ready || level === this.intensity) return;
     this.intensity = level;
-    const k = { '-1': 0.55, 0: 0.6, 1: 0.7, 2: 0.8, 3: 1 }[level] ?? 0.6;
+    const k = { '-1': 0.75, 0: 0.8, 1: 0.88, 2: 0.95, 3: 1.05 }[level] ?? 0.8;
     this.stormLevel = k;
     const t = this.ctx.currentTime;
-    this.rainL.g.gain.setTargetAtTime(0.16 * k, t, 1.5);
-    this.rainR.g.gain.setTargetAtTime(0.16 * k, t, 1.5);
-    this.rainBody.g.gain.setTargetAtTime(0.35 * k * k, t, 1.5);
-    this.wind.f.frequency.setTargetAtTime(300 + k * 300, t, 2);
+    if (this.rainNear) this.rainNear.g.gain.setTargetAtTime(this.rainNear.vol * k, t, 2);
+    if (this.rainFar) this.rainFar.g.gain.setTargetAtTime(this.rainFar.vol * k, t, 2);
+    this.wind.f.frequency.setTargetAtTime(300 + k * 160, t, 3);
   }
 
   setDark() {}

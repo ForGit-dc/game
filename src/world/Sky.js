@@ -173,7 +173,7 @@ export class Sky {
     this.flashTimer -= dt;
     if (this.flashTimer <= 0) {
       this.flash = 1;
-      this.flashTimer = 5 + Math.random() * 9 - shared.alarm.value * 4;
+      this.flashTimer = 14 + Math.random() * 22 - shared.alarm.value * 6;
       this.onLightning?.();
     }
     this.flash = Math.max(0, this.flash - dt * 3.5);
