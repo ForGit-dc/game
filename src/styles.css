@@ -1603,14 +1603,21 @@ body:not(.playing) #hud .hud-bc { opacity: 0.12; }
   .hud-tr .val { min-width: 60px; }
 }
 
+/* --- menu panels must stay readable over the bright city: near-opaque, high-contrast text --- */
+#menu .menu-panel {
+  background: rgba(6, 7, 18, 0.95);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-color: rgba(34, 230, 255, 0.45);
+  color: #eef8ff;
+}
+#menu .menu-panel .keys span, #menu .menu-panel .credits p { color: #cfe3ee; }
+#menu .menu-panel .credits b { color: #ffffff; }
+
 /* --- author panel --- */
-.author { font-size: 14px; line-height: 1.55; color: var(--muted); }
-.au-name { font-size: 26px; font-weight: 700; letter-spacing: 0.12em; color: #f2fdff; text-shadow: 0 0 16px rgba(34, 230, 255, 0.6); }
-.au-role { font-family: var(--mono); font-size: 12px; letter-spacing: 0.2em; color: var(--magenta); margin: 4px 0 12px; }
-.author b { color: var(--text); }
-.author ul { margin: 8px 0; padding-left: 18px; }
-.author li { margin: 4px 0; }
-.author li::marker { color: var(--cyan); }
-.au-note { color: var(--gold); opacity: 0.9; }
-.au-link { display: inline-block; margin-top: 4px; font-family: var(--mono); color: var(--cyan); text-decoration: none; letter-spacing: 0.1em; border-bottom: 1px solid var(--cyan-dim); }
+.author { font-size: 16px; line-height: 1.6; color: #e6f2fa; }
+.au-name { font-size: 26px; font-weight: 700; letter-spacing: 0.04em; color: #ffffff; }
+.au-role { font-size: 14px; letter-spacing: 0.12em; color: var(--cyan); margin: 2px 0 14px; text-transform: uppercase; }
+.author p { margin: 0 0 12px; }
+.au-link { display: inline-block; margin: 2px 0 6px; font-size: 16px; color: var(--cyan); text-decoration: none; border-bottom: 1px solid var(--cyan); }
 .au-link:hover { color: #fff; border-color: #fff; }

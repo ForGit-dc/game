@@ -34,8 +34,9 @@ The game is signed "A game by Anass El Basraoui" and reskinned with his ML world
 - Weapons: `pulse` PYTHON PULSE → PYTORCH RAILSTORM · `arc` XGBOOST CHAIN → GRADIENT STORM · `orbit` CLIP ORBIT → DINO HALO · `nova` HDBSCAN NOVA → UMAP SUPERNOVA · `seeker` RETRIEVAL SWARM → RERANKER HYDRA · `drone` LLM AGENT → MULTI-AGENT.
 - Passives: `coils` CUDA CORES · `cycler` TERRAFORM · `frame` CLOUD RUN · `magnet` DATA PIPELINE · `nano` MONITORING · `capacitor` EMBEDDINGS · `targeting` FROZEN TEST SET · `phase` SERVERLESS · `echo` BENCHMARK.
 - Enemies: BUG (wisp), OUTLIER (shard), DATA LEAK (sentinel), LEGACY CODE (bulwark), DUPLICATE (splitter), MEMORY LEAK (bomber). Bosses: THE HALLUCINATION (hive), OVERFIT (lancer), THE BLACK BOX (warden). Events: DATA DRIFT STORM (meteors), GPU OUTAGE (blackout).
-- Menu has an **AUTHOR** panel (`#panel-author` in `index.html`) built from his CV; neon signs/holograms around the arena show his name, schools and stack (`Arena.buildScenery`).
-- **Privacy:** the game is public. Only his name, role, achievements and website `elbasraoui.engineer` are shown. Never put his phone number or e-mail in the game or the repo.
+- **Keep it sober** — the user said "je veux pas exagérer": no rankings, no numbers, no schools/employer/city, no CV bragging. The **AUTHOR** panel (`#panel-author` in `index.html`) is just name, role, two plain sentences and the website link. His name appears only in: menu kicker ("A GAME BY ANASS EL BASRAOUI"), HUD tag, credits, author panel, page title, and one neon sign among ML words (`Arena.buildScenery`).
+- Menu panels must stay **readable**: near-opaque dark background + light text (`#menu .menu-panel` in `styles.css`); the user complained the first version was illegible.
+- **Privacy:** the game is public. Only his name, role and website `elbasraoui.engineer` are shown. Never put his phone number or e-mail in the game or the repo.
 
 ## Deployment
 
@@ -98,6 +99,7 @@ Also: horde surge every ~55s (ring of wisps closing on the player), an elite eve
 
 ## Testing (headless)
 
+- (Reading screenshots can fail once a large image is in the conversation — then verify with DOM measurements: computed colours, font sizes, rects.)
 - A Playwright + Chromium install lives **outside the repo** in a scratchpad `pw/` dir (harness `h.mjs` + scripts `look.mjs`, `paths.mjs`, `boss.mjs`, `perf.mjs`, `audio.mjs`). Scratchpads get wiped between sessions: if missing, `npm init -y && npm i playwright` in a scratch dir (Chromium is cached in `~/.cache/ms-playwright`).
 - Launch flags: `--use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist`. Use `?debug&lowq` (or `?debug&pr=0.8&msaa=0` for nicer screenshots), viewport ~640×360–960×540.
 - Drive the game with `window.__game.debugStep(frames, dt)` (deterministic, no rAF) **in chunks of ≤10 frames per `page.evaluate`** — big chunks crash the renderer (first frames compile shaders for ~15s in SwiftShader). Simulate input by writing `game.input.down/pressed` and `game.input.mouse.*`.

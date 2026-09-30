@@ -339,8 +339,8 @@ export class Game {
     this.cam.targetDist = 20;
     this.camera.position.set(0, 40, 30);
     document.body.classList.add('playing');
-    this.ui.banner('OPERATOR // ANASS EL BASRAOUI', 'SHIP THE MODEL', `${this.overdrive ? 'OVERDRIVE · ' : ''}10:00 until the Black Box wakes`, '');
-    this.ui.log('PIPELINE ONLINE. OPERATOR: ANASS.', 'sys');
+    this.ui.banner('THE RING', 'SHIP THE MODEL', `${this.overdrive ? 'OVERDRIVE · ' : ''}10:00 until the Black Box wakes`, '');
+    this.ui.log('PIPELINE ONLINE.', 'sys');
     this.schedule(1.4, () => this.ui.prompt(`${this.keyHint('KeyW', 'KeyA', 'KeyS', 'KeyD')} MOVE · <kbd>MOUSE</kbd> AIM · <kbd>LMB</kbd> FIRE · <kbd>SPACE</kbd> DASH · <kbd>RMB</kbd> BLADE`, 8));
     this.schedule(10, () => this.ui.prompt(`<kbd>T</kbd> TOGGLE AUTO-FIRE (${this.settings.autoFire ? 'ON' : 'OFF'}) · <kbd>WHEEL</kbd> ZOOM`, 5));
   }
@@ -1184,7 +1184,7 @@ export class Game {
     this.ui.showEnd(victory ? 'victory' : 'gameover', {
       rows, score, rank, earned, newBest, total: this.meta.shards,
       build: this.progression.slots(),
-      reason: victory ? 'Anass shipped it. The model is live in production.' : t < RUN_LENGTH ? `The Ring fell silent at ${mm(t)}.` : 'The endless city claimed you.',
+      reason: victory ? 'The model is live in production.' : t < RUN_LENGTH ? `The Ring fell silent at ${mm(t)}.` : 'The endless city claimed you.',
       endless: victory && !this.waves.endless,
     });
     this.audio.setIntensity(0);

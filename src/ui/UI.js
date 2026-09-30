@@ -90,7 +90,7 @@ export class UI {
     const s = m.stats;
     $('menu-foot').textContent = s.runs
       ? `RUNS ${s.runs} · BEST ${fmt(s.bestTime)} · ${s.bestScore.toLocaleString('en-US')} PTS · ${s.victories} VICTORIES`
-      : 'OPERATOR ANASS // NO RECORD — THE RING AWAITS';
+      : 'NO RECORD — THE RING AWAITS';
     const od = m.level('overdrive') > 0;
     $('diff-btn').classList.toggle('hidden', !od);
     $('diff-label').textContent = g.difficulty === 'overdrive' ? 'OVERDRIVE' : 'NORMAL';

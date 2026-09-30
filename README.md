@@ -1,8 +1,6 @@
 # NEON//ECHO
 
-**A game by Anass El Basraoui** — Data Scientist & ML Engineer ([elbasraoui.engineer](https://elbasraoui.engineer)).
-
-A 3D neon roguelite horde-survival game that runs in the browser. You play a machine-learning engineer surviving everything that breaks a model in production: bugs, outliers, data leaks, overfitting, and finally the Black Box. Everything is procedural: every mesh, texture and sound is generated at runtime, with no asset files and no music.
+A 3D neon roguelite horde-survival game that runs in the browser, by Anass El Basraoui ([elbasraoui.engineer](https://elbasraoui.engineer)). The enemies are what breaks a machine-learning model in production: bugs, outliers, data leaks, overfitting, and finally the Black Box. Everything is procedural: every mesh, texture and sound is generated at runtime, with no asset files and no music.
 
 K-7, a courier android, is trapped on **the Ring**, a floating arena above the drowned city of Vashta. Survive 10 minutes of escalating drone hordes and build a loadout from weapons, passives and evolutions. Three bosses stand in your way: **Hive Mother** (3:00), **Lancer** (6:30) and **The Warden** (10:00). After that, keep going in Endless mode. When you die, the shards you earned buy permanent upgrades in the **Neural Lattice**.
 
