@@ -42,13 +42,14 @@ export class Game {
     this.post = { damage: 0, glitch: 0, overclock: 0, radial: 0, white: 0, fade: 0 };
     this.bosses = [];
     this.meteors = [];
-    this.settings = { autoFire: false };
+    this.settings = { autoFire: false, autoBlade: false };
     this.aimPoint = new THREE.Vector3(0, SHOT_Y, -5);
     this.blackout = 0;
     this.blackoutTarget = 0;
     this.difficulty = 'normal';
     try {
       this.settings.autoFire = localStorage.getItem('neon-echo-autofire') === '1';
+      this.settings.autoBlade = localStorage.getItem('neon-echo-autoblade') === '1';
     } catch {
       /* no storage */
     }
@@ -331,6 +332,7 @@ export class Game {
     this.ui.hideAll();
     this.ui.setHud(true);
     this.ui.resetRunHud();
+    this.ui.syncSettings();
     this.audio.setIntensity(0);
     this.audio.setMuffle(0);
     this.state = 'playing';
@@ -342,7 +344,7 @@ export class Game {
     this.ui.banner('THE RING', 'SHIP THE MODEL', `${this.overdrive ? 'OVERDRIVE · ' : ''}10:00 until the Black Box wakes`, '');
     this.ui.log('PIPELINE ONLINE.', 'sys');
     this.schedule(1.4, () => this.ui.prompt(`${this.keyHint('KeyW', 'KeyA', 'KeyS', 'KeyD')} MOVE · <kbd>MOUSE</kbd> AIM · <kbd>LMB</kbd> FIRE · <kbd>SPACE</kbd> DASH · <kbd>RMB</kbd> BLADE`, 8));
-    this.schedule(10, () => this.ui.prompt(`<kbd>T</kbd> TOGGLE AUTO-FIRE (${this.settings.autoFire ? 'ON' : 'OFF'}) · <kbd>WHEEL</kbd> ZOOM`, 5));
+    this.schedule(10, () => this.ui.prompt(`${this.keyHint('KeyT')} AUTO-FIRE (${this.settings.autoFire ? 'ON' : 'OFF'}) · ${this.keyHint('KeyY')} AUTO-BLADE (${this.settings.autoBlade ? 'ON' : 'OFF'}) · <kbd>WHEEL</kbd> ZOOM`, 6));
   }
 
   continueEndless() {
@@ -387,7 +389,35 @@ export class Game {
       this.ui.log(`AUTO-FIRE ${this.settings.autoFire ? 'ENGAGED' : 'OFF'}`, 'sys');
       this.ui.syncSettings();
     }
+    if (code === 'KeyY' && (this.state === 'playing' || this.state === 'paused')) this.toggleAutoBlade();
     if (this.state === 'levelup' && code === 'KeyR') this.rerollCards();
+  }
+
+  toggleAutoBlade(value = !this.settings.autoBlade) {
+    this.settings.autoBlade = value;
+    try {
+      localStorage.setItem('neon-echo-autoblade', value ? '1' : '0');
+    } catch {
+      /* ignore */
+    }
+    this.ui.log(`AUTO-BLADE ${value ? 'ENGAGED' : 'OFF'}`, 'sys');
+    this.ui.syncSettings();
+  }
+
+  /** Auto-blade: direction to the nearest drone, boss or hostile orb within blade reach, or null. */
+  bladeTarget(p) {
+    const R = 3.7 * p.stats.areaMul;
+    let best = null, bd = Infinity;
+    const consider = (x, z, extra) => {
+      const d = Math.hypot(x - p.pos.x, z - p.pos.z);
+      if (d < R + extra && d < bd) { bd = d; best = [x - p.pos.x, z - p.pos.z]; }
+    };
+    this.horde.forEachNear(p.pos.x, p.pos.z, R, (e) => { if (e.spawnT <= 0.5) consider(e.x, e.z, e.r * 0.5); });
+    for (const b of this.bosses) if (!b.invulnerable) consider(b.x, b.z, b.r);
+    for (const o of this.projectiles.orbs) if (!o.reflected) consider(o.x, o.z, 0.6);
+    if (!best) return null;
+    const l = Math.hypot(best[0], best[1]) || 1;
+    return [best[0] / l, best[1] / l];
   }
 
   schedule(delay, fn) {
@@ -694,10 +724,9 @@ export class Game {
     return best;
   }
 
-  bladeSlash(p) {
+  bladeSlash(p, ax = p.aim.x, az = p.aim.z) {
     const s = p.stats;
     const R = 3.7 * s.areaMul;
-    const ax = p.aim.x, az = p.aim.z;
     const dmg = 50 * s.dmgMul;
     const victims = [];
     this.horde.forEachNear(p.pos.x, p.pos.z, R, (e) => {

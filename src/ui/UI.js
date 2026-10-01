@@ -53,6 +53,7 @@ export class UI {
         /* ignore */
       }
     });
+    $('set-autoblade').addEventListener('change', (e) => g.toggleAutoBlade(e.target.checked));
     $('set-auto').addEventListener('change', (e) => {
       g.settings.autoFire = e.target.checked;
       try {
@@ -427,6 +428,8 @@ export class UI {
 
   syncSettings() {
     $('set-auto').checked = this.game.settings.autoFire;
+    $('set-autoblade').checked = this.game.settings.autoBlade;
+    this.el.abBlade.classList.toggle('auto', this.game.settings.autoBlade);
     if (this.game.audio.ambience !== undefined) $('set-amb').value = String(this.game.audio.ambience);
   }
 

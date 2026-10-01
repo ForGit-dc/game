@@ -1646,3 +1646,10 @@ body:not(.playing) #hud .hud-bc { opacity: 0.12; }
 }
 .end-hint b { color: var(--cyan); }
 .end-btns .sbtn.primary { animation: pulseBorder 1.6s ease-in-out infinite; }
+
+/* auto-blade badge on the blade ability */
+.ability.auto { border-color: #ffe94a; }
+.ability.auto::after {
+  content: 'AUTO'; position: absolute; top: -9px; left: 50%; transform: translateX(-50%); z-index: 4;
+  padding: 0 4px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; color: #111; background: #ffe94a;
+}

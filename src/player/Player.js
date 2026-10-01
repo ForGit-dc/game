@@ -195,12 +195,18 @@ export class Player {
     // ---------------------------------------------------------------- combat
     const firing = controls && this.dropT <= 0 && (input.mouse.left || g.settings.autoFire);
     if (firing) this.aimT = 0.45;
-    if (controls && this.dropT <= 0 && (input.mouse.rightPressed || input.wasPressed('KeyF')) && this.bladeCd <= 0) {
-      this.bladeCd = 0.62 * s.cdMul;
-      this.model.slash();
-      this.aimT = 0.5;
-      this.facing = Math.atan2(this.aim.x, this.aim.z);
-      g.bladeSlash(this);
+    if (controls && this.dropT <= 0 && this.bladeCd <= 0) {
+      // manual swing toward the cursor, or (auto-blade) toward the nearest threat in reach
+      let dir = null;
+      if (input.mouse.rightPressed || input.wasPressed('KeyF')) dir = [this.aim.x, this.aim.z];
+      else if (g.settings.autoBlade) dir = g.bladeTarget(this);
+      if (dir) {
+        this.bladeCd = 0.62 * s.cdMul;
+        this.model.slash();
+        this.aimT = 0.5;
+        this.facing = Math.atan2(dir[0], dir[1]);
+        g.bladeSlash(this, dir[0], dir[1]);
+      }
     }
     if (controls && input.wasPressed('KeyQ')) {
       if (this.sync >= 100 && this.overT <= 0) {
