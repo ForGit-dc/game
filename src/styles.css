@@ -1653,3 +1653,6 @@ body:not(.playing) #hud .hud-bc { opacity: 0.12; }
   content: 'AUTO'; position: absolute; top: -9px; left: 50%; transform: translateX(-50%); z-index: 4;
   padding: 0 4px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; color: #111; background: #ffe94a;
 }
+
+/* stage label above the run timer */
+.stage-lbl { font-size: 12px; font-weight: 700; letter-spacing: 0.35em; color: #ffffff; text-shadow: 0 0 10px var(--cyan); margin-bottom: 2px; }

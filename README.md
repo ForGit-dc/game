@@ -38,6 +38,12 @@ To build a static version, run `npm run build`, which outputs to `dist/`. Serve 
   - Nova Pulse + Nano Mesh → Supernova
   - Seeker Swarm + Targeting → Hydra
   - Laser Drone + Cycler → Twin Satellites
+- **Three stages.** Each one is played on its own themed Ring, with its own drone mix, events and boss:
+  - Stage 1, **The Ring**: The Hallucination
+  - Stage 2, **The Data Lake**: Overfit
+  - Stage 3, **The Core**: The Black Box
+
+  Killing a stage boss clears the stage (+30 % integrity, +30 shards) and warps you to the next one with your build intact. Clearing stage 3 wins the run and unlocks Endless.
 - **Scripted events:**
   - 2:00 and 7:10: meteor storms (the circles hurt drones too)
   - 5:00: the outer ring collapses

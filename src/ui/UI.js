@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { LATTICE } from '../systems/Meta.js';
-import { RUN_LENGTH } from '../systems/Waves.js';
+import { STAGES } from '../systems/Waves.js';
 
 const $ = (id) => document.getElementById(id);
 const _v = new THREE.Vector3();
@@ -232,7 +232,10 @@ export class UI {
     this.set('lvl', el.xpLvl, 'text', `LV ${pr.level}`);
     const t = g.waves.t;
     this.set('timer', el.timer, 'text', fmt(t));
-    const late = t >= RUN_LENGTH - 60 && !g.waves.endless;
+    const w = g.waves;
+    this.set('stage', $('stage-lbl'), 'text', w.endless ? `ENDLESS · LOOP ${w.loop}` : `STAGE ${w.stage + 1} / ${STAGES.length} · ${w.def.name}`);
+    const nev = w.nextEvent;
+    const late = !!(nev && nev.boss && nev.left < 30) || !!this.boss;
     if (this.cache.late !== late) {
       this.cache.late = late;
       el.timer.classList.toggle('late', late);
@@ -454,7 +457,7 @@ export class UI {
       ? `NEXT STEP → open the <b>LATTICE</b>: you can buy <b>${affordable}</b> permanent upgrade${affordable > 1 ? 's' : ''} with your ◆ shards, then <b>REBOOT</b> stronger.`
       : kind === 'victory'
         ? 'NEXT STEP → <b>CONTINUE</b> into Endless, or start a new run.'
-        : 'NEXT STEP → <b>REBOOT</b> and survive longer: every run earns ◆ shards for permanent upgrades. Reach 10:00 to face the Black Box.';
+        : 'NEXT STEP → <b>REBOOT</b> and survive longer: every run earns ◆ shards for permanent upgrades. Beat each stage boss to reach the next stage — the Black Box waits at stage 3.';
     const box = $(kind === 'victory' ? 'victory' : 'gameover');
     box.querySelectorAll('.end-btns .sbtn').forEach((btn) => {
       const act = btn.dataset.action;

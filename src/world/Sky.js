@@ -8,6 +8,7 @@ import { shared } from './Materials.js';
 export class Sky {
   constructor(scene) {
     this.uniforms = {
+      uHor: { value: new THREE.Vector3(0.42, 0.09, 0.36) },
       uTime: shared.time,
       uAlarm: shared.alarm,
       uFlash: { value: 0 },
@@ -33,6 +34,7 @@ export class Sky {
         uniform float uAlarm;
         uniform float uFlash;
         uniform vec3 uMoonDir;
+        uniform vec3 uHor;
         varying vec3 vDir;
 
         float hash(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
@@ -50,7 +52,7 @@ export class Sky {
           // base gradient: magenta haze horizon -> violet -> ink zenith
           vec3 zen = vec3(0.012, 0.008, 0.035);
           vec3 mid = vec3(0.07, 0.025, 0.16);
-          vec3 hor = vec3(0.42, 0.09, 0.36);
+          vec3 hor = uHor;
           vec3 col = mix(hor, mid, smoothstep(-0.02, 0.22, h));
           col = mix(col, zen, smoothstep(0.2, 0.85, h));
 
@@ -59,7 +61,7 @@ export class Sky {
           col += vec3(1.0, 0.35, 0.08) * warm * 0.35 * (1.0 - smoothstep(0.0, 0.25, h));
 
           // below horizon: city glow through the cloud sea
-          col = mix(col, vec3(0.3, 0.06, 0.22), smoothstep(0.02, -0.25, h));
+          col = mix(col, uHor * 0.7, smoothstep(0.02, -0.25, h));
 
           // nebula
           float n = fbm(d * 3.0 + vec3(0.0, 0.0, uTime * 0.004));
@@ -112,6 +114,7 @@ export class Sky {
 
     // --- The Abyss: glowing cloud sea beneath the city ---
     this.abyssUniforms = {
+      uGlow: { value: new THREE.Vector3(0.55, 0.08, 0.5) },
       uTime: shared.time,
       uAlarm: shared.alarm,
       uFlash: this.uniforms.uFlash,
@@ -132,6 +135,7 @@ export class Sky {
         uniform float uTime;
         uniform float uAlarm;
         uniform float uFlash;
+        uniform vec3 uGlow;
         varying vec3 vWorld;
         float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
         float noise(vec2 p) {
@@ -146,7 +150,7 @@ export class Sky {
           float lights = pow(fbm(p * 6.0 + 11.0), 3.0);
           float dist = length(vWorld.xz);
           vec3 deep = vec3(0.05, 0.01, 0.08);
-          vec3 glowA = vec3(0.55, 0.08, 0.5);
+          vec3 glowA = uGlow;
           vec3 glowB = vec3(1.0, 0.35, 0.1);
           vec3 col = mix(deep, glowA, smoothstep(0.35, 0.8, c));
           col += glowB * lights * (1.2 + uAlarm * 3.0) * smoothstep(0.4, 0.7, c);
@@ -164,6 +168,11 @@ export class Sky {
 
     this.flashTimer = 4;
     this.flash = 0;
+  }
+
+  setTheme(horizon, glow) {
+    this.uniforms.uHor.value.set(...horizon);
+    this.abyssUniforms.uGlow.value.set(...glow);
   }
 
   update(dt, camera) {

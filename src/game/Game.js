@@ -16,7 +16,7 @@ import { Horde } from '../enemies/Horde.js';
 import { BOSSES } from '../enemies/Bosses.js';
 import { Progression } from '../systems/Progression.js';
 import { Loot } from '../systems/Loot.js';
-import { Waves, RUN_LENGTH } from '../systems/Waves.js';
+import { Waves, STAGES } from '../systems/Waves.js';
 import { Meta } from '../systems/Meta.js';
 import { AudioEngine } from '../audio/Audio.js';
 import { UI } from '../ui/UI.js';
@@ -24,6 +24,13 @@ import { damp, rand } from '../utils/math.js';
 
 const FOG = 0x0f0820;
 const FOG_DENSITY = 0.0072;
+
+/** Per-stage look: fog, sky horizon, abyss glow, arena circuits/barrier/lips and area lights. */
+const THEMES = {
+  ring: { fog: 0x0f0820, hemi: 0x6a4ab0, horizon: [0.42, 0.09, 0.36], glow: [0.55, 0.08, 0.5], circuitA: '#1ad9ff', circuitB: '#ff33d9', barrier: '#33ccff', lips: ['#22e6ff', '#ff2bd6', '#8b5cff'], lights: ['#ff2bd6', '#22e6ff', '#8b5cff', '#ff8a2b'] },
+  lake: { fog: 0x04161b, hemi: 0x2c7f8f, horizon: [0.05, 0.3, 0.34], glow: [0.05, 0.42, 0.45], circuitA: '#20ffd0', circuitB: '#4d9dff', barrier: '#20ffd0', lips: ['#20ffd0', '#4d9dff', '#22e6ff'], lights: ['#20ffd0', '#4d9dff', '#22e6ff', '#9b7bff'] },
+  core: { fog: 0x1a0706, hemi: 0x8a3a2a, horizon: [0.5, 0.12, 0.05], glow: [0.6, 0.16, 0.04], circuitA: '#ff8a2b', circuitB: '#ff2a55', barrier: '#ff6a2a', lips: ['#ffd36b', '#ff8a2b', '#ff2a55'], lights: ['#ff2a55', '#ff8a2b', '#ffd36b', '#ff2bd6'] },
+};
 
 export class Game {
   constructor(canvas, { debug = false, lowQuality = false, pixelRatio = null, msaa = null } = {}) {
@@ -317,6 +324,7 @@ export class Game {
     this.bestCombo = 0;
     this.elites = 0;
     this.bossKills = 0;
+    this.stagesCleared = 0;
     this.runShards = 0;
     this.dodges = 0;
     this.deflects = 0;
@@ -341,7 +349,8 @@ export class Game {
     this.cam.targetDist = 20;
     this.camera.position.set(0, 40, 30);
     document.body.classList.add('playing');
-    this.ui.banner('THE RING', 'SHIP THE MODEL', `${this.overdrive ? 'OVERDRIVE · ' : ''}10:00 until the Black Box wakes`, '');
+    this.applyTheme(STAGES[0].theme);
+    this.ui.banner(`STAGE 1 / ${STAGES.length}${this.overdrive ? ' · OVERDRIVE' : ''}`, STAGES[0].name, `${STAGES[0].sub} — beat its boss to move on`, '');
     this.ui.log('PIPELINE ONLINE.', 'sys');
     this.schedule(1.4, () => this.ui.prompt(`${this.keyHint('KeyW', 'KeyA', 'KeyS', 'KeyD')} MOVE · <kbd>MOUSE</kbd> AIM · <kbd>LMB</kbd> FIRE · <kbd>SPACE</kbd> DASH · <kbd>RMB</kbd> BLADE`, 8));
     this.schedule(10, () => this.ui.prompt(`${this.keyHint('KeyT')} AUTO-FIRE (${this.settings.autoFire ? 'ON' : 'OFF'}) · ${this.keyHint('KeyY')} AUTO-BLADE (${this.settings.autoBlade ? 'ON' : 'OFF'}) · <kbd>WHEEL</kbd> ZOOM`, 6));
@@ -353,6 +362,7 @@ export class Game {
     this.state = 'playing';
     this.cam.cinematic = null;
     this.waves.startEndless();
+    this.applyTheme('core');
     this.audio.setMuffle(0);
     this.ui.banner('ENDLESS', 'PRODUCTION NEVER SLEEPS', 'How long can one engineer hold the line?', 'warn');
     document.body.classList.add('playing');
@@ -508,6 +518,7 @@ export class Game {
     U.uGlitch.value = P.glitch;
     U.uOverclock.value = P.overclock;
     U.uRadial.value = P.radial;
+    P.white = Math.max(0, P.white - rawDt * 1.6);
     U.uWhite.value = P.white;
     U.uFade.value = P.fade;
     U.uAlarm.value = shared.alarm.value * (st === 'playing' ? 0.8 : 0.3);
@@ -1064,8 +1075,10 @@ export class Game {
     this.loot.item('heart', x + 2, z);
     b.dispose();
     this.ui.bossBar(null);
-    if (b instanceof BOSSES.warden && !this.waves.endless) this.startVictory();
-    else if (b instanceof BOSSES.warden) this.coreTarget.copy(this.coreRest);
+    if (!this.waves.endless) {
+      if (this.waves.lastStage) this.startVictory();
+      else this.startStageClear();
+    } else if (b instanceof BOSSES.warden) this.coreTarget.copy(this.coreRest);
   }
 
   onWardenPhase(ph) {
@@ -1174,6 +1187,56 @@ export class Game {
 
   // ================================================================== endings
 
+  // ================================================================== stages
+
+  applyTheme(name) {
+    const t = THEMES[name] || THEMES.ring;
+    this.scene.fog.color.set(t.fog);
+    this.hemi.color.set(t.hemi);
+    this.sky.setTheme(t.horizon, t.glow);
+    this.arena.applyTheme(t);
+  }
+
+  /** Stage boss down: clear the field, reward, then warp to the next stage's Ring. */
+  startStageClear() {
+    const i = this.waves.stage;
+    const next = STAGES[i + 1];
+    this.stagesCleared++;
+    this.runShards += 30;
+    this.waves.paused = true;
+    for (const e of [...this.horde.list]) if (e.alive) this.horde.kill(e, 'victory');
+    this.projectiles.orbs.length = 0;
+    this.loot.vacuum();
+    this.player.heal(this.player.stats.maxHp * 0.3);
+    this.ui.banner(`STAGE ${i + 1} CLEAR`, `${STAGES[i].name} CLEARED`, `Integrity +30% · ◆ +30 · next: ${next.name}`, 'gold');
+    this.audio.uplinkStart();
+    this.schedule(4.5, () => this.enterStage(i + 1));
+  }
+
+  enterStage(i) {
+    if (this.state === 'dead') return;
+    const st = STAGES[i];
+    this.post.white = 1;
+    this.post.glitch = 0.8;
+    this.cam.addTrauma(0.5);
+    for (const m of this.meteorPool) { m.active = false; m.ring.visible = m.fill.visible = m.rock.visible = false; }
+    this.meteors.length = 0;
+    this.setBlackout(false, true);
+    this.arena.reset();
+    this.applyTheme(st.theme);
+    this.waves.startStage(i);
+    this.waves.paused = false;
+    this.player.dropIn();
+    if (st.theme === 'core') {
+      this.coreTarget.set(0, -40, -128);
+      this.core.setAwake(0.7);
+    } else {
+      this.coreTarget.copy(this.coreRest);
+    }
+    this.ui.banner(`STAGE ${i + 1} / ${STAGES.length}`, st.name, `${st.sub} — beat its boss to move on`, i === STAGES.length - 1 ? 'red' : '');
+    this.audio.collapseStart();
+  }
+
   startVictory() {
     this.state = 'victory';
     this.vicT = 0;
@@ -1199,6 +1262,7 @@ export class Game {
     const newBest = this.meta.recordRun({ time: t, kills: this.kills, score, victory, bosses: this.bossKills });
     const mm = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
     const rows = [
+      ['STAGES CLEARED', `${this.stagesCleared + (victory ? 1 : 0)} / ${STAGES.length}`],
       ['TIME SURVIVED', mm(t)],
       ['LEVEL', String(this.progression.level)],
       ['DRONES DESTROYED', this.kills.toLocaleString('en-US')],
@@ -1213,7 +1277,7 @@ export class Game {
     this.ui.showEnd(victory ? 'victory' : 'gameover', {
       rows, score, rank, earned, newBest, total: this.meta.shards,
       build: this.progression.slots(),
-      reason: victory ? 'The model is live in production.' : t < RUN_LENGTH ? `The Ring fell silent at ${mm(t)}.` : 'The endless city claimed you.',
+      reason: victory ? 'The model is live in production.' : this.waves.endless ? 'The endless city claimed you.' : `Stage ${this.waves.stage + 1} · ${STAGES[this.waves.stage].name} — signal lost at ${mm(t)}.`,
       endless: victory && !this.waves.endless,
     });
     this.audio.setIntensity(0);

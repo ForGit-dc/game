@@ -26,6 +26,8 @@ Files (all live): `game/{Game,TopCamera,Input}.js`, `player/{Player,PlayerModel}
 
 Audio: user said the first storm sounded "fake et agaçant" → rewritten as **pre-rendered buffers** (`_renderRain` droplet synthesis, `_renderThunder` rumble bank + near crack), thunder throttled (≥2.5 s apart) and lightning much rarer (14–36 s), ambience slider in pause (`localStorage neon-echo-amb`). If the user still dislikes it, lower/disable thunder first.
 
+**Stages** (user asked "ajoute d'autres steps"): a run = 3 stages defined in `systems/Waves.js` `STAGES` (THE RING → THE DATA LAKE → THE CORE), each with its own drone unlocks, events and boss (event/unlock times are relative to `waves.stageT`; difficulty `hpMul`/spawn rate follow total time `waves.t`). Boss killed → `Game.startStageClear()` (clear field, +30% HP, +30 shards, 4.5 s) → `Game.enterStage(i)` (arena reset, `applyTheme`, drop-in). Themes in `Game.js` `THEMES` drive fog, hemi light, `Sky.setTheme`, `Arena.applyTheme`. Stage 3 boss → victory → Endless. Verified headless end to end.
+
 Possible next steps: real-GPU playtest feedback from the user, balance tuning (spawn rate in `Waves.update`, xp curve `xpToNext`), more enemy variety/bosses, stripping `Level.build()`.
 
 ## Personalisation (Anass's game)

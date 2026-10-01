@@ -93,6 +93,8 @@ export class Arena extends Level {
 
     // glowing circuitry overlay (one shader across all rings)
     this.circuitU = {
+      uColA: { value: new THREE.Color(0.1, 0.85, 1.0) },
+      uColB: { value: new THREE.Color(1.0, 0.2, 0.85) },
       uTime: shared.time,
       uAlarm: shared.alarm,
       uPulse: { value: 0 },
@@ -115,6 +117,7 @@ export class Arena extends Level {
       `,
       fragmentShader: /* glsl */ `
         uniform float uTime, uAlarm, uPulse, uPulseR;
+        uniform vec3 uColA, uColB;
         uniform vec3 uWarn;
         uniform vec3 uPlayer;
         varying vec3 vWorld;
@@ -152,8 +155,8 @@ export class Arena extends Level {
           float dash = step(0.5, fract(a * 30.0 + uTime * 0.2));
           border *= 0.6 + 0.4 * dash;
           // colour: cyan <-> magenta by angle, orange under alarm or collapse warning
-          vec3 cA = vec3(0.1, 0.85, 1.0);
-          vec3 cB = vec3(1.0, 0.2, 0.85);
+          vec3 cA = uColA;
+          vec3 cB = uColB;
           vec3 col = mix(cA, cB, 0.5 + 0.5 * sin(a * 2.0 + r * 0.08));
           vec3 warnCol = vec3(1.0, 0.35, 0.05);
           float inWarn = 0.0;
@@ -199,7 +202,7 @@ export class Arena extends Level {
   }
 
   buildBarrier() {
-    this.barrierU = { uTime: shared.time, uAlarm: shared.alarm, uPlayer: { value: new THREE.Vector3() }, uR: { value: this.boundary }, uHit: { value: 0 } };
+    this.barrierU = { uTime: shared.time, uAlarm: shared.alarm, uPlayer: { value: new THREE.Vector3() }, uR: { value: this.boundary }, uHit: { value: 0 }, uCol: { value: new THREE.Color(0.2, 0.8, 1.0) } };
     const mat = new THREE.ShaderMaterial({
       uniforms: this.barrierU,
       transparent: true,
@@ -212,6 +215,7 @@ export class Arena extends Level {
       `,
       fragmentShader: /* glsl */ `
         uniform float uTime, uAlarm, uR, uHit;
+        uniform vec3 uCol;
         uniform vec3 uPlayer;
         varying vec3 vWorld; varying vec2 vUv;
         void main() {
@@ -222,7 +226,7 @@ export class Arena extends Level {
           float near = 1.0 - smoothstep(0.0, 6.0, length(vWorld.xz - uPlayer.xz));
           float base = pow(1.0 - h, 3.0);
           float scan = smoothstep(0.96, 1.0, fract(h * 3.0 - uTime * 0.6));
-          vec3 col = mix(vec3(0.2, 0.8, 1.0), vec3(1.0, 0.4, 0.1), uAlarm);
+          vec3 col = mix(uCol, vec3(1.0, 0.4, 0.1), uAlarm);
           float I = base * 0.55 + grid * (0.08 + near * 0.9) * (1.0 - h) + scan * 0.15 * (1.0 - h) + near * base * 1.2 + uHit * base;
           gl_FragColor = vec4(col * I, 1.0);
         }
@@ -371,6 +375,18 @@ export class Arena extends Level {
   }
 
   // ------------------------------------------------------------------ runtime
+
+  /** Recolour the Ring for a stage: circuits, barrier, segment lips and the four area lights. */
+  applyTheme(t) {
+    this.circuitU.uColA.value.set(t.circuitA);
+    this.circuitU.uColB.value.set(t.circuitB);
+    this.barrierU.uCol.value.set(t.barrier);
+    for (const s of this.segments) {
+      s.trim.set(t.lips[s.stage]);
+      if (s.state === 'idle') s.lipMat.color.copy(s.trim).multiplyScalar(3.2);
+    }
+    this.lights.forEach((L, i) => L.color.set(t.lights[i % t.lights.length]));
+  }
 
   reset() {
     for (const s of this.segments) {
