@@ -1621,3 +1621,17 @@ body:not(.playing) #hud .hud-bc { opacity: 0.12; }
 .author p { margin: 0 0 12px; }
 .au-link { display: inline-block; margin: 2px 0 6px; font-size: 16px; color: var(--cyan); text-decoration: none; border-bottom: 1px solid var(--cyan); }
 .au-link:hover { color: #fff; border-color: #fff; }
+
+/* --- "what now?" line on the end screens --- */
+.end-hint {
+  margin: 12px auto 0;
+  max-width: 560px;
+  padding: 10px 14px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #eef8ff;
+  background: rgba(34, 230, 255, 0.1);
+  border: 1px solid rgba(34, 230, 255, 0.45);
+}
+.end-hint b { color: var(--cyan); }
+.end-btns .sbtn.primary { animation: pulseBorder 1.6s ease-in-out infinite; }

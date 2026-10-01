@@ -440,6 +440,23 @@ export class UI {
     $(`${pre}-stats`).innerHTML = d.rows.map(([k, v]) => `<div><span>${k}</span><span>${v}</span></div>`).join('') +
       `<div class="total"><span>SCORE${d.newBest ? ' · NEW RECORD' : ''}</span><span>${d.score.toLocaleString('en-US')}</span></div>`;
     $(`${pre}-shards`).innerHTML = `<b>+◆ ${d.earned}</b> SHARDS EARNED <small>· ${d.total} IN THE LATTICE</small>`;
+    // tell the player what to do next: spend shards if they can, otherwise go again
+    const meta = this.game.meta;
+    const affordable = LATTICE.filter((n) => {
+      const c = meta.costOf(n.id);
+      return c !== null && meta.shards >= c;
+    }).length;
+    const hint = $(`${pre}-hint`);
+    hint.innerHTML = affordable > 0
+      ? `NEXT STEP → open the <b>LATTICE</b>: you can buy <b>${affordable}</b> permanent upgrade${affordable > 1 ? 's' : ''} with your ◆ shards, then <b>REBOOT</b> stronger.`
+      : kind === 'victory'
+        ? 'NEXT STEP → <b>CONTINUE</b> into Endless, or start a new run.'
+        : 'NEXT STEP → <b>REBOOT</b> and survive longer: every run earns ◆ shards for permanent upgrades. Reach 10:00 to face the Black Box.';
+    const box = $(kind === 'victory' ? 'victory' : 'gameover');
+    box.querySelectorAll('.end-btns .sbtn').forEach((btn) => {
+      const act = btn.dataset.action;
+      btn.classList.toggle('primary', affordable > 0 ? act === 'to-lattice' : act === (kind === 'victory' ? 'continue' : 'restart'));
+    });
     $(`${pre}-build`).innerHTML = this.buildHtml(d.build);
     $(`${pre}-reason`).textContent = d.reason;
     if (kind === 'victory') {
