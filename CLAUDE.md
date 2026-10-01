@@ -35,6 +35,7 @@ The game is signed "A game by Anass El Basraoui" and reskinned with his ML world
 - Passives: `coils` CUDA CORES · `cycler` TERRAFORM · `frame` CLOUD RUN · `magnet` DATA PIPELINE · `nano` MONITORING · `capacitor` EMBEDDINGS · `targeting` FROZEN TEST SET · `phase` SERVERLESS · `echo` BENCHMARK.
 - Enemies: BUG (wisp), OUTLIER (shard), DATA LEAK (sentinel), LEGACY CODE (bulwark), DUPLICATE (splitter), MEMORY LEAK (bomber). Bosses: THE HALLUCINATION (hive), OVERFIT (lancer), THE BLACK BOX (warden). Events: DATA DRIFT STORM (meteors), GPU OUTAGE (blackout).
 - **Keep it sober** — the user said "je veux pas exagérer": no rankings, no numbers, no schools/employer/city, no CV bragging. The **AUTHOR** panel (`#panel-author` in `index.html`) is just name, role, two plain sentences and the website link. His name appears only in: menu kicker ("A GAME BY ANASS EL BASRAOUI"), HUD tag, credits, author panel, page title, and one neon sign among ML words (`Arena.buildScenery`).
+- The aim **reticle** must stay big and high-contrast (yellow ring + white ticks + black outline, ~66px span, `#reticle` in `styles.css`): the user found the first one too small and the same colour as the arena.
 - Menu panels must stay **readable**: near-opaque dark background + light text (`#menu .menu-panel` in `styles.css`); the user complained the first version was illegible.
 - **Privacy:** the game is public. Only his name, role and website `elbasraoui.engineer` are shown. Never put his phone number or e-mail in the game or the repo.
 
