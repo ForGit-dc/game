@@ -73,6 +73,7 @@ export class Player {
     this.aimT = 0;
     this.dead = false;
     this.revived = false;
+    this.revivesUsed = 0;
     this.hitFlash = 0;
     this.stepDist = 0;
     this.dropT = 0;
@@ -267,12 +268,14 @@ export class Player {
       return 'dodge';
     }
     if (this.invuln > 0) return false;
+    dmg *= this.stats.armorMul ?? 1;
     this.hp -= dmg;
     this.invuln = 0.55;
     this.hitFlash = 1;
     this.game.onPlayerHurt(dmg, fromX, fromZ);
     if (this.hp <= 0) {
-      if (!this.revived && this.game.meta.level('revive') > 0) {
+      if (this.revivesUsed < this.game.meta.level('revive')) {
+        this.revivesUsed++;
         this.revived = true;
         this.hp = this.stats.maxHp * 0.5;
         this.invuln = 2.5;
@@ -293,7 +296,7 @@ export class Player {
   addSync(n) {
     if (this.overT > 0) return;
     const before = this.sync;
-    this.sync = Math.min(100, this.sync + n);
+    this.sync = Math.min(100, this.sync + n * (this.stats.syncMul ?? 1));
     if (before < 100 && this.sync >= 100) this.game.onSyncReady();
   }
 }

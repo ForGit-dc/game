@@ -31,13 +31,19 @@ To build a static version, run `npm run build`, which outputs to `dist/`. Serve 
 ## How a run works
 
 - **Kills drop data shards.** Collect them to level up, then pick 1 of 3 cards (a new weapon, an upgrade or a passive). You have 4 weapon slots and 4 passive slots.
+- **Levels go up to 8.** You have 5 weapon slots and 5 passive slots. Each level past 5 adds +20 % damage and −7 % cooldown.
+- **Ten weapons**, each with its own mechanic: Python Pulse, XGBoost Chain, CLIP Orbit, HDBSCAN Nova, Backprop (discs that fly out and come back), Attention Head (a beam that burns harder the longer it stares), and four unlocked from the Lattice: Retrieval Swarm, LLM Agent, K-Means Singularity (black holes that cluster drones then collapse them) and GAN Decoy (a holographic double that lures drones, shoots and explodes).
 - **Evolutions.** Max a weapon to level 5 while owning its paired passive, and a golden EVOLVE card appears. The pairs are:
   - Pulse Blaster + Coils → Railstorm
   - Arc Chain + Capacitor → Thundercrown
   - Orbit Blades + Kinetic Frame → Halo of Knives
   - Nova Pulse + Nano Mesh → Supernova
   - Seeker Swarm + Targeting → Hydra
-  - Laser Drone + Cycler → Twin Satellites
+  - LLM Agent + Terraform → Multi-Agent
+  - Backprop + Serverless → Gradient Descent
+  - Attention Head + Benchmark → Multi-Head Attention
+  - K-Means Singularity + Data Pipeline → Hierarchical Collapse
+  - GAN Decoy + Regularization → Adversarial Pair
 - **Three stages.** Each one is played on its own themed Ring, with its own drone mix, events and boss:
   - Stage 1, **The Ring**: The Hallucination
   - Stage 2, **The Data Lake**: Overfit

@@ -294,7 +294,16 @@ export class Horde {
         e.spawnT = Math.max(0, e.spawnT - dt * 0.9);
         e.y += (e.def.y - e.y) * Math.min(1, dt * 3.5);
       }
-      const dx = px - e.x, dz = pz - e.z;
+      let tx = px, tz = pz;
+      const taunts = g.taunts;
+      if (taunts && taunts.length) {
+        let best = (px - e.x) ** 2 + (pz - e.z) ** 2;
+        for (const t of taunts) {
+          const d2 = (t.x - e.x) ** 2 + (t.z - e.z) ** 2;
+          if (d2 < t.r * t.r && d2 < best) { best = d2; tx = t.x; tz = t.z; }
+        }
+      }
+      const dx = tx - e.x, dz = tz - e.z;
       const dist = Math.hypot(dx, dz) || 1e-4;
       const nx = dx / dist, nz = dz / dist;
       let wantX = nx, wantZ = nz, sp = e.speed, accel = 5;

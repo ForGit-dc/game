@@ -1,8 +1,9 @@
 import { WEAPONS, PASSIVES, createWeapon } from '../combat/Weapons.js';
 
-export const MAX_WEAPONS = 4;
-export const MAX_PASSIVES = 4;
-export const MAX_LEVEL = 5;
+export const MAX_WEAPONS = 5;
+export const MAX_PASSIVES = 5;
+export const MAX_LEVEL = 8;
+export const EVOLVE_AT = 5;
 
 export const BASE_STATS = () => ({
   maxHp: 100,
@@ -18,6 +19,10 @@ export const BASE_STATS = () => ({
   dashCharges: 1,
   dashCd: 1.15,
   overTime: 6,
+  armorMul: 1,
+  bladeMul: 1,
+  bladeReach: 1,
+  syncMul: 1,
 });
 
 export function xpToNext(level) {
@@ -73,6 +78,11 @@ export class Progression {
     s.magnet *= 1 + meta.level('magnet') * 0.2;
     s.regen += meta.level('regen') * 0.3;
     s.dashCharges += meta.level('dash');
+    s.crit += meta.level('crit') * 0.03;
+    s.armorMul *= Math.pow(0.96, meta.level('armor'));
+    s.bladeMul *= 1 + meta.level('blade') * 0.12;
+    s.bladeReach *= 1 + meta.level('blade') * 0.05;
+    s.syncMul *= 1 + meta.level('sync') * 0.15;
     const P = (id) => this.passives.get(id) || 0;
     s.dmgMul *= 1 + P('coils') * 0.12;
     s.cdMul *= Math.pow(0.92, P('cycler'));
@@ -87,6 +97,7 @@ export class Progression {
     s.dashCharges += (P('phase') >= 1 ? 1 : 0) + (P('phase') >= 3 ? 1 : 0) + (P('phase') >= 5 ? 1 : 0);
     s.xpMul *= 1 + P('echo') * 0.12;
     s.overTime += P('echo');
+    s.armorMul *= Math.pow(0.94, P('reg'));
     this.stats = s;
     if (p) {
       p.stats = s;
@@ -98,7 +109,7 @@ export class Progression {
   evolutionsReady() {
     const out = [];
     for (const w of this.weapons.values()) {
-      if (w.evolved || w.level < MAX_LEVEL) continue;
+      if (w.evolved || w.level < EVOLVE_AT) continue;
       if (this.passives.has(w.def.evo.with)) out.push(w);
     }
     return out;
@@ -121,10 +132,14 @@ export class Progression {
     }
     const pool = [];
     for (const w of this.weapons.values()) {
-      if (w.level < MAX_LEVEL && !w.evolved) {
+      if (w.level < MAX_LEVEL) {
+        const over = w.level >= EVOLVE_AT;
         pool.push({
-          kind: 'weapon', id: w.id, weight: 3, title: w.def.name, glyph: w.def.glyph, color: w.def.color,
-          desc: w.def.desc[w.level], tag: `LV ${w.level + 1}`, level: w.level + 1,
+          kind: 'weapon', id: w.id, weight: over ? 2.4 : 3,
+          title: w.evolved ? w.def.evo.name : w.def.name, glyph: w.def.glyph, color: w.evolved ? '#ffd36b' : w.def.color,
+          desc: over ? '+20% damage, -7% cooldown.' : w.def.desc[w.level],
+          tag: `LV ${w.level + 1}`, level: w.level + 1,
+          hint: over && !w.evolved ? `Evolves with ${PASSIVES[w.def.evo.with].name}` : null,
         });
       }
     }

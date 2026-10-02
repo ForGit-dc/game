@@ -49,6 +49,7 @@ export class Game {
     this.post = { damage: 0, glitch: 0, overclock: 0, radial: 0, white: 0, fade: 0 };
     this.bosses = [];
     this.meteors = [];
+    this.taunts = [];
     this.settings = { autoFire: false, autoBlade: false };
     this.aimPoint = new THREE.Vector3(0, SHOT_Y, -5);
     this.blackout = 0;
@@ -317,6 +318,9 @@ export class Game {
     this.player.hp = this.player.stats.maxHp;
     this.player.dashCharges = this.player.stats.dashCharges;
     this.player.dropIn();
+    this.progression.pending += this.meta.level('headstart');
+    this.levelDelay = 1.6;
+    this.taunts = [];
     this.score = 0;
     this.kills = 0;
     this.combo = 0;
@@ -416,7 +420,7 @@ export class Game {
 
   /** Auto-blade: direction to the nearest drone, boss or hostile orb within blade reach, or null. */
   bladeTarget(p) {
-    const R = 3.7 * p.stats.areaMul;
+    const R = 3.7 * p.stats.areaMul * p.stats.bladeReach;
     let best = null, bd = Infinity;
     const consider = (x, z, extra) => {
       const d = Math.hypot(x - p.pos.x, z - p.pos.z);
@@ -737,8 +741,8 @@ export class Game {
 
   bladeSlash(p, ax = p.aim.x, az = p.aim.z) {
     const s = p.stats;
-    const R = 3.7 * s.areaMul;
-    const dmg = 50 * s.dmgMul;
+    const R = 3.7 * s.areaMul * s.bladeReach;
+    const dmg = 50 * s.dmgMul * s.bladeMul;
     const victims = [];
     this.horde.forEachNear(p.pos.x, p.pos.z, R, (e) => {
       const dx = e.x - p.pos.x, dz = e.z - p.pos.z;
@@ -1256,7 +1260,7 @@ export class Game {
     const p = this.player;
     const t = this.waves.t;
     const shardsBase = t / 10 + this.kills / 25 + this.bossKills * 50 + this.elites * 10 + this.progression.level * 2 + (victory ? 200 : 0);
-    const earned = Math.floor((shardsBase + this.runShards) * (this.overdrive ? 1.6 : 1));
+    const earned = Math.floor((shardsBase + this.runShards) * (this.overdrive ? 1.6 : 1) * (1 + 0.1 * this.meta.level('shards')));
     this.meta.addShards(earned);
     const score = Math.floor(this.score + (victory ? 20000 + p.hp * 20 : 0));
     const newBest = this.meta.recordRun({ time: t, kills: this.kills, score, victory, bosses: this.bossKills });

@@ -28,6 +28,11 @@ Audio: user said the first storm sounded "fake et agaçant" → rewritten as **p
 
 **Stages** (user asked "ajoute d'autres steps"): a run = 3 stages defined in `systems/Waves.js` `STAGES` (THE RING → THE DATA LAKE → THE CORE), each with its own drone unlocks, events and boss (event/unlock times are relative to `waves.stageT`; difficulty `hpMul`/spawn rate follow total time `waves.t`). Boss killed → `Game.startStageClear()` (clear field, +30% HP, +30 shards, 4.5 s) → `Game.enterStage(i)` (arena reset, `applyTheme`, drop-in). Themes in `Game.js` `THEMES` drive fog, hemi light, `Sky.setTheme`, `Arena.applyTheme`. Stage 3 boss → victory → Endless. Verified headless end to end.
 
+**Progression v3** (user: more Lattice levels, no level-5 cap in match, more creative weapons):
+- In-match cap is **level 8** (`MAX_LEVEL`), evolution still unlocks at **5** (`EVOLVE_AT`) and evolved weapons keep levelling; each level above 5 = +20% damage, −7% cooldown via the per-weapon stat view `Weapon.get S()`. Slots are **5 weapons + 5 passives**.
+- **10 weapons**: the 6 originals + `boomerang` BACKPROP (discs out-and-back → GRADIENT DESCENT, +SERVERLESS), `attention` ATTENTION HEAD (focus beam that ramps on the strongest target → MULTI-HEAD ATTENTION, +BENCHMARK), `kmeans` K-MEANS SINGULARITY (black-hole centroids pull then collapse → HIERARCHICAL COLLAPSE, +DATA PIPELINE; Lattice unlock), `gan` GAN DECOY (holographic double that taunts drones via `game.taunts`, shoots, detonates → ADVERSARIAL PAIR, +new passive `reg` REGULARIZATION −6% damage taken; Lattice unlock).
+- **Lattice: 21 nodes**, up to 10 ranks, escalating costs (`costs()` in `Meta.js`). New: FIREWALL (armor), PRECISION (crit), BLADE MASTERY, SYNC BOOSTER, SHARD MINER, HEAD START (free level-ups at run start), revive rank 2, dash rank 2, unlocks for K-Means and GAN. New stats live in `BASE_STATS` (`armorMul`, `bladeMul`, `bladeReach`, `syncMul`).
+
 Possible next steps: real-GPU playtest feedback from the user, balance tuning (spawn rate in `Waves.update`, xp curve `xpToNext`), more enemy variety/bosses, stripping `Level.build()`.
 
 ## Personalisation (Anass's game)

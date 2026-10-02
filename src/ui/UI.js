@@ -205,10 +205,10 @@ export class UI {
 
   refreshSlots() {
     const { weapons, passives } = this.game.progression.slots();
-    const slot = (s) => `<div class="slot ${s.evolved ? 'evo' : ''}" style="--c:${s.color}" title="${s.name}"><span>${s.glyph}</span><em>${s.evolved ? '★' : s.level}</em></div>`;
+    const slot = (s) => `<div class="slot ${s.evolved ? 'evo' : ''}" style="--c:${s.color}" title="${s.name}"><span>${s.glyph}</span><em>${s.evolved ? '★' : ''}${s.level}</em></div>`;
     const empty = (n, max) => '<div class="slot empty"></div>'.repeat(Math.max(0, max - n));
-    this.el.wSlots.innerHTML = weapons.map(slot).join('') + empty(weapons.length, 4);
-    this.el.pSlots.innerHTML = passives.map(slot).join('') + empty(passives.length, 4);
+    this.el.wSlots.innerHTML = weapons.map(slot).join('') + empty(weapons.length, 5);
+    this.el.pSlots.innerHTML = passives.map(slot).join('') + empty(passives.length, 5);
   }
 
   // ------------------------------------------------------------------ per-frame HUD
@@ -437,7 +437,7 @@ export class UI {
   }
 
   buildHtml({ weapons, passives }) {
-    const row = (s) => `<div class="b-item" style="--c:${s.color}"><span>${s.glyph}</span><b>${s.name}</b><em>${s.evolved ? 'EVOLVED' : `LV ${s.level}`}</em></div>`;
+    const row = (s) => `<div class="b-item" style="--c:${s.color}"><span>${s.glyph}</span><b>${s.name}</b><em>${s.evolved ? `EVOLVED · LV ${s.level}` : `LV ${s.level}`}</em></div>`;
     return `<div class="b-col">${weapons.map(row).join('')}</div><div class="b-col">${passives.map(row).join('') || '<div class="b-none">no passives</div>'}</div>`;
   }
 
