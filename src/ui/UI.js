@@ -16,7 +16,7 @@ export class UI {
       warning: $('warning'), hpFill: $('hp-fill'), hpGhost: $('hp-ghost'), hpVal: $('hp-val'), hpBar: document.querySelector('.bar.hp'),
       syncFill: $('sync-fill'), syncVal: $('sync-val'), wSlots: $('w-slots'), pSlots: $('p-slots'),
       kills: $('kills'), score: $('score'), shards: $('shards'), combo: $('combo'), comboN: $('combo-n'),
-      log: $('log'), abDash: $('ab-dash'), abBlade: $('ab-blade'), abOver: $('ab-over'), dashPips: $('dash-pips'),
+      log: $('log'), abDash: $('ab-dash'), abBlade: $('ab-blade'), abOver: $('ab-over'), abSpecial: $('ab-special'), dashPips: $('dash-pips'),
       reticle: $('reticle'), dmgDir: $('dmg-dir'), banner: $('banner'), bannerKicker: $('banner-kicker'), bannerMain: $('banner-main'), bannerSub: $('banner-sub'),
       prompt: $('prompt'), dmgnums: $('dmgnums'), fade: $('fade'),
       menu: $('menu'), cards: $('cards'), pause: $('pause'), gameover: $('gameover'), victory: $('victory'),
@@ -159,7 +159,7 @@ export class UI {
   }
 
   pulseAbility(name) {
-    const el = name === 'dash' ? this.el.abDash : name === 'blade' ? this.el.abBlade : this.el.abOver;
+    const el = name === 'dash' ? this.el.abDash : name === 'blade' ? this.el.abBlade : name === 'special' ? this.el.abSpecial : this.el.abOver;
     el.classList.add('pop');
     setTimeout(() => el.classList.remove('pop'), 140);
   }
@@ -277,6 +277,13 @@ export class UI {
     this.set('pips', el.dashPips, 'html', pips);
     this.set('bcd', el.abBlade, '--cd', Math.max(0, p.bladeCd / (0.62 * s.cdMul)).toFixed(3));
     const over = p.overclocked;
+    const spMax = g.specialCooldown();
+    this.set('scd', el.abSpecial, '--cd', Math.max(0, p.specialCd / spMax).toFixed(3));
+    const spReady = p.specialCd <= 0;
+    if (this.cache.spReady !== spReady) {
+      this.cache.spReady = spReady;
+      el.abSpecial.classList.toggle('ready', spReady);
+    }
     this.set('ocd', el.abOver, '--cd', over ? '0' : (1 - p.sync / 100).toFixed(3));
     const ready = p.sync >= 100 && !over;
     if (this.cache.ready !== ready) {

@@ -1656,3 +1656,8 @@ body:not(.playing) #hud .hud-bc { opacity: 0.12; }
 
 /* stage label above the run timer */
 .stage-lbl { font-size: 12px; font-weight: 700; letter-spacing: 0.35em; color: #ffffff; text-shadow: 0 0 10px var(--cyan); margin-bottom: 2px; }
+
+/* DEPLOY special attack slot */
+.ability.special { border-color: rgba(255, 233, 74, 0.45); }
+.ability.special svg { stroke: #ffe94a; }
+.ability.special.ready { border-color: #ffe94a; box-shadow: 0 0 16px rgba(255, 233, 74, 0.45); }

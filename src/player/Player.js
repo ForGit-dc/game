@@ -68,6 +68,7 @@ export class Player {
     this.dashT = 0;
     this.invuln = 0;
     this.bladeCd = 0;
+    this.specialCd = 0;
     this.sync = 0;
     this.overT = 0;
     this.aimT = 0;
@@ -146,6 +147,7 @@ export class Player {
     // timers
     this.invuln -= dt;
     this.bladeCd -= dt;
+    this.specialCd -= dt;
     this.aimT -= dt;
     this.hitFlash = Math.max(0, this.hitFlash - dt * 6);
     if (this.dashCharges < s.dashCharges) {
@@ -208,6 +210,14 @@ export class Player {
         this.facing = Math.atan2(dir[0], dir[1]);
         g.bladeSlash(this, dir[0], dir[1]);
       }
+    }
+    if (controls && this.dropT <= 0 && input.wasPressed('KeyE')) {
+      if (this.specialCd <= 0) {
+        this.specialCd = g.specialCooldown();
+        this.facing = Math.atan2(this.aim.x, this.aim.z);
+        this.aimT = 0.6;
+        g.castSpecial(aimPoint);
+      } else g.audio.denied();
     }
     if (controls && input.wasPressed('KeyQ')) {
       if (this.sync >= 100 && this.overT <= 0) {

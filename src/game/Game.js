@@ -51,6 +51,7 @@ export class Game {
     this.bosses = [];
     this.meteors = [];
     this.taunts = [];
+    this.specials = [];
     this.settings = { autoFire: false, autoBlade: false };
     this.aimPoint = new THREE.Vector3(0, SHOT_Y, -5);
     this.blackout = 0;
@@ -147,8 +148,18 @@ export class Game {
     this.ui.setKeyLabels(this.input);
     this.input.onKey = (code) => this.onKey(code);
     canvas.addEventListener('wheel', (e) => {
-      if (this.state === 'playing') this.cam.zoom(e.deltaY);
+      if (this.state === 'playing') {
+        this.cam.zoom(e.deltaY);
+        this.saveZoom();
+      }
     }, { passive: true });
+    try {
+      const z = parseFloat(localStorage.getItem('neon-echo-zoom'));
+      if (z > 0) this.cam.targetDist = this.cam.dist = Math.min(this.cam.maxDist, Math.max(this.cam.minDist, z));
+    } catch {
+      /* no storage */
+    }
+    this.buildSpecialFx();
 
     progress('Warming shaders…');
     await tick();
@@ -195,6 +206,122 @@ export class Game {
     this.scene.environment = pmrem.fromScene(env, 0.03).texture;
     this.scene.environmentIntensity = 0.8;
     pmrem.dispose();
+  }
+
+  saveZoom() {
+    try {
+      localStorage.setItem('neon-echo-zoom', String(Math.round(this.cam.targetDist * 10) / 10));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  specialCooldown() {
+    const s = this.player.stats;
+    return 20 * (0.5 + 0.5 * (s ? s.cdMul : 1));
+  }
+
+  buildSpecialFx() {
+    this.specialPool = [];
+    for (let i = 0; i < 3; i++) {
+      const add = (geo, color, k, flat = true) => {
+        const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(k), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+        if (flat) m.rotation.x = -Math.PI / 2;
+        m.visible = false;
+        m.frustumCulled = false;
+        this.scene.add(m);
+        return m;
+      };
+      const beamGeo = new THREE.CylinderGeometry(1, 1, 160, 32, 1, true);
+      beamGeo.translate(0, 80, 0);
+      this.specialPool.push({
+        ring: add(new THREE.RingGeometry(0.93, 1, 64), '#ffe94a', 3),
+        fill: add(new THREE.CircleGeometry(1, 48), '#ffb35c', 0.5),
+        beam: add(beamGeo, '#fff4c2', 4, false),
+        active: false,
+      });
+    }
+  }
+
+  /** DEPLOY: orbital strike at the cursor — telegraph, sky beam, chain lightning, then a burning zone. */
+  castSpecial(aim) {
+    const p = this.player;
+    let x = aim ? aim.x : p.pos.x + p.aim.x * 8, z = aim ? aim.z : p.pos.z + p.aim.z * 8;
+    const dx = x - p.pos.x, dz = z - p.pos.z, d = Math.hypot(dx, dz);
+    if (d > 18) { x = p.pos.x + (dx / d) * 18; z = p.pos.z + (dz / d) * 18; }
+    const lim = this.arena.boundary - 1;
+    const r = Math.hypot(x, z);
+    if (r > lim) { x *= lim / r; z *= lim / r; }
+    const fx = this.specialPool.find((s) => !s.active) || this.specialPool[0];
+    const R = 6.5 * p.stats.areaMul;
+    Object.assign(fx, { active: true, x, z, R, t: 0, struck: false, tick: 0 });
+    fx.ring.visible = fx.fill.visible = true;
+    fx.ring.position.set(x, 0.09, z);
+    fx.fill.position.set(x, 0.08, z);
+    this.specials.push(fx);
+    this.audio.bossCharge?.(null, 0.55);
+    this.ui.pulseAbility('special');
+  }
+
+  updateSpecials(dt) {
+    const T = 0.55;
+    for (let i = this.specials.length - 1; i >= 0; i--) {
+      const s = this.specials[i];
+      s.t += dt;
+      if (!s.struck) {
+        const k = Math.min(1, s.t / T);
+        s.ring.scale.setScalar(s.R * (1.35 - 0.35 * k));
+        s.fill.scale.setScalar(s.R * k);
+        s.fill.material.opacity = 0.3 + 0.5 * k;
+        if (s.t >= T) this.specialStrike(s);
+        continue;
+      }
+      // burning zone
+      const a = s.t - T;
+      const k = Math.max(0, 1 - a / 3);
+      s.beam.scale.set(Math.max(0.01, s.R * 0.9 * Math.max(0, 1 - a / 0.6)), 1, Math.max(0.01, s.R * 0.9 * Math.max(0, 1 - a / 0.6)));
+      s.beam.visible = a < 0.6;
+      s.fill.material.opacity = 0.55 * k * (0.75 + 0.25 * Math.sin(s.t * 20));
+      s.ring.scale.setScalar(s.R * (1 + a * 0.15));
+      s.tick -= dt;
+      if (s.tick <= 0 && k > 0) {
+        s.tick = 0.25;
+        this.areaDamage(s.x, s.z, s.R * 0.65, 35 * this.player.stats.dmgMul, { knock: 2, cause: 'special' });
+        if (Math.random() < 0.8) this.particles.burst(_v.set(s.x + rand(-s.R, s.R) * 0.5, 0.3, s.z + rand(-s.R, s.R) * 0.5), { count: 4, color: '#ffb35c', colorEnd: '#ff2a55', speed: [1, 4], life: [0.4, 0.9], up: 3, size: [0.15, 0.35] });
+      }
+      if (a > 3) {
+        s.active = false;
+        s.ring.visible = s.fill.visible = s.beam.visible = false;
+        this.specials.splice(i, 1);
+      }
+    }
+  }
+
+  specialStrike(s) {
+    const st = this.player.stats;
+    s.struck = true;
+    s.beam.visible = true;
+    s.beam.position.set(s.x, 0, s.z);
+    const dmg = 380 * st.dmgMul;
+    this.areaDamage(s.x, s.z, s.R, dmg, { knock: 24, cause: 'special' });
+    for (const b of this.bosses) if (Math.hypot(b.x - s.x, b.z - s.z) < s.R + b.r) this.hitBoss(b, dmg * 0.6, true, b.x, b.z);
+    // chain lightning out of the impact
+    const pts = [];
+    this.horde.forEachNear(s.x, s.z, s.R * 2.2, (e) => { if (pts.length < 12) pts.push(e); });
+    for (const e of pts) {
+      this.projectiles.zap([[s.x, 1.5, s.z], [e.x, 1.1, e.z]], '#ffe94a', 0.3);
+      this.hitEnemy(e, 60 * st.dmgMul, 0, 0, 3, { quiet: true, pierceShield: true });
+    }
+    this.particles.burst(_v.set(s.x, 0.6, s.z), { count: 160, color: '#ffffff', colorEnd: '#ffb35c', speed: [5, 22], life: [0.3, 1], size: [0.1, 0.32], drag: 2 });
+    this.particles.burst(_v, { count: 30, color: '#ffe94a', speed: [1, 3], life: [0.6, 1.2], size: [1, 2.2], sizeEnd: 2, drag: 2, intensity: 1.1 });
+    this.fx.ring(_v2.set(s.x, 0.2, s.z), '#ffe94a', s.R * 2.2, 0.6);
+    this.fx.ring(_v2.set(s.x, 2, s.z), '#ffffff', s.R * 1.2, 0.4, this.camera.position);
+    this.fx.flash(_v2.set(s.x, 4, s.z), '#fff4c2', 220, 0.5);
+    this.audio.explosion(null, 3);
+    this.audio.thunder(0, 1.1);
+    this.cam.addTrauma(0.75);
+    this.hitstop = Math.max(this.hitstop, 0.08);
+    this.post.radial = 1;
   }
 
   buildMeteorPool() {
@@ -303,6 +430,8 @@ export class Game {
     this.meteors.length = 0;
     this.setBlackout(false, true);
     this.coreTarget.copy(this.coreRest);
+    for (const sp of this.specialPool || []) { sp.active = false; sp.ring.visible = sp.fill.visible = sp.beam.visible = false; }
+    this.specials = [];
     this.core.setAwake(0.25);
     shared.alarm.value = 0;
   }
@@ -351,14 +480,15 @@ export class Game {
     this.state = 'playing';
     this.cam.cinematic = null;
     this.cam.snap(new THREE.Vector3(0, 0, 4));
-    this.cam.targetDist = 20;
+    this.specials = [];
+    this.player.specialCd = 0;
     this.camera.position.set(0, 40, 30);
     document.body.classList.add('playing');
     this.applyTheme(STAGES[0].theme);
     this.ui.banner(`STAGE 1 / ${STAGES.length}${this.overdrive ? ' · OVERDRIVE' : ''}`, STAGES[0].name, `${STAGES[0].sub} — beat its boss to move on`, '');
     this.ui.log('PIPELINE ONLINE.', 'sys');
     this.schedule(1.4, () => this.ui.prompt(`${this.keyHint('KeyW', 'KeyA', 'KeyS', 'KeyD')} MOVE · <kbd>MOUSE</kbd> AIM · <kbd>LMB</kbd> FIRE · <kbd>SPACE</kbd> DASH · <kbd>RMB</kbd> BLADE`, 8));
-    this.schedule(10, () => this.ui.prompt(`${this.keyHint('KeyT')} AUTO-FIRE (${this.settings.autoFire ? 'ON' : 'OFF'}) · ${this.keyHint('KeyY')} AUTO-BLADE (${this.settings.autoBlade ? 'ON' : 'OFF'}) · <kbd>WHEEL</kbd> ZOOM`, 6));
+    this.schedule(10, () => this.ui.prompt(`${this.keyHint('KeyT')} AUTO-FIRE (${this.settings.autoFire ? 'ON' : 'OFF'}) · ${this.keyHint('KeyY')} AUTO-BLADE (${this.settings.autoBlade ? 'ON' : 'OFF'}) · ${this.keyHint('KeyE')} DEPLOY · <kbd>WHEEL</kbd> ZOOM`, 7));
   }
 
   continueEndless() {
@@ -405,6 +535,8 @@ export class Game {
       this.ui.syncSettings();
     }
     if (code === 'KeyY' && (this.state === 'playing' || this.state === 'paused')) this.toggleAutoBlade();
+    if (this.state === 'playing' && (code === 'NumpadAdd' || code === 'PageUp' || code === 'Equal')) { this.cam.zoom(-260); this.saveZoom(); }
+    if (this.state === 'playing' && (code === 'NumpadSubtract' || code === 'PageDown' || code === 'Minus')) { this.cam.zoom(260); this.saveZoom(); }
     if (this.state === 'levelup' && code === 'KeyR') this.rerollCards();
   }
 
@@ -498,6 +630,12 @@ export class Game {
     this.updateBlackout(rawDt);
 
     const focus = st === 'playing' || st === 'levelup' || st === 'paused' || st === 'dead' ? p.pos : _menuFocus;
+    const half = Math.max(26, this.cam.dist * 1.15);
+    const sc = this.moon.shadow.camera;
+    if (Math.abs(sc.right - half) > 2) {
+      sc.left = -half; sc.right = half; sc.top = half; sc.bottom = -half; sc.far = 120 + half;
+      sc.updateProjectionMatrix();
+    }
     this.moon.position.set(focus.x - 20, focus.y + 45, focus.z + 22);
     this.moon.target.position.copy(focus);
 
@@ -593,6 +731,9 @@ export class Game {
     this.loot.update(pdt);
     this.waves.update(wdt);
     this.updateMeteors(wdt);
+    this.updateSpecials(pdt);
+    // pull the camera back a little when the screen gets crowded or a boss is up
+    this.cam.autoTarget = (this.bosses.length ? 6 : 0) + Math.min(6, this.horde.count / 45);
     this.updateRainSplashes(dt);
 
     // combo decay
@@ -1187,7 +1328,9 @@ export class Game {
     this.blackout += (this.blackoutTarget - this.blackout) * damp(1.5, dt);
     const b = this.blackout;
     const flick = b > 0.05 && Math.random() < 0.04 ? 0.5 : 1;
-    this.scene.fog.density = FOG_DENSITY + b * 0.03;
+    // keep the arena readable when zoomed far out: thin the fog with camera distance
+    const zoomFog = Math.min(1, Math.max(0.35, 24 / Math.max(24, this.cam.dist)));
+    this.scene.fog.density = FOG_DENSITY * zoomFog + b * 0.03;
     shared.fogDensity.value = this.scene.fog.density;
     this.hemi.intensity = (1.0 - b * 0.85) * flick;
     this.moon.intensity = 1.4 * (1 - b * 0.9);

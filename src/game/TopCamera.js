@@ -8,8 +8,12 @@ import { clamp, damp, noise1 } from '../utils/math.js';
 export class TopCamera {
   constructor(camera) {
     this.camera = camera;
-    this.dist = 20;
-    this.targetDist = 20;
+    this.minDist = 12;
+    this.maxDist = 64;
+    this.dist = 24;
+    this.targetDist = 24;
+    this.autoExtra = 0; // extra pull-back the game asks for (bosses, big hordes)
+    this.autoTarget = 0;
     this.pitch = THREE.MathUtils.degToRad(47);
     this.focus = new THREE.Vector3();
     this.trauma = 0;
@@ -27,8 +31,14 @@ export class TopCamera {
     this.initialized = false;
   }
 
+  /** Proportional zoom: the same wheel notch feels the same close up and far out. */
   zoom(delta) {
-    this.targetDist = clamp(this.targetDist + delta * 0.012, 14, 30);
+    this.targetDist = clamp(this.targetDist * Math.exp(delta * 0.0011), this.minDist, this.maxDist);
+  }
+
+  /** 0 = closest, 1 = furthest. */
+  get zoomT() {
+    return (this.dist - this.minDist) / (this.maxDist - this.minDist);
   }
 
   addTrauma(a) {
@@ -74,7 +84,11 @@ export class TopCamera {
     this.focus.x += (fx - this.focus.x) * k;
     this.focus.z += (fz - this.focus.z) * k;
     this.focus.y += (target.y * 0.3 - this.focus.y) * k;
-    this.dist += (this.targetDist - this.dist) * damp(6, dt);
+    this.autoExtra += (this.autoTarget - this.autoExtra) * damp(1.2, dt);
+    this.dist += (clamp(this.targetDist + this.autoExtra, this.minDist, this.maxDist + 8) - this.dist) * damp(6, dt);
+    // tilt toward top-down as you pull back, so the whole horde stays readable
+    const zt = clamp((this.dist - this.minDist) / (this.maxDist - this.minDist), 0, 1);
+    this.pitch = THREE.MathUtils.degToRad(44 + 22 * zt * zt * (3 - 2 * zt));
     const h = Math.sin(this.pitch) * this.dist;
     const back = Math.cos(this.pitch) * this.dist;
     this._pos.set(this.focus.x, this.focus.y + h, this.focus.z + back);

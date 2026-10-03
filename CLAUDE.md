@@ -36,6 +36,9 @@ Audio: user said the first storm sounded "fake et agaçant" → rewritten as **p
 - **DATA INGESTION** passive `ingest` (8 ranks, `INGEST_RANGE` in `Weapons.js`): kills within N m of the player drop shards with `pull` set (fly straight to you); rank 8 = every kill anywhere (`Game.ingests`, `Loot.xp(x,z,v,pull)`). Cards use `PASSIVES[id].descFor(level)`.
 - **Endless squeeze**: after 20 s of Endless the barrier closes at 0.075 m/s down to `ENDLESS_MIN_RADIUS` = 11 (`Waves.update` → `Arena.shrinkTo`); rings break away as the barrier passes them; HUD shows the ring width.
 
+- **DEPLOY special attack** on **E** (`Game.castSpecial` → `specialStrike` → burning zone in `updateSpecials`): orbital strike at the cursor (≤18 m), 0.55 s telegraph, 380×dmg in 6.5 m, chain lightning, 3 s burn; cooldown `Game.specialCooldown()` = 20 s scaled by half of `cdMul`; HUD slot `#ab-special`.
+- **Camera zoom** (user wanted a better zoom + strong zoom-out): default 24, wheel/NumpadAdd/NumpadSubtract/PageUp/PageDown from 12 to 64 (proportional steps), pitch tilts 44°→66° as you pull back, auto pull-back for bosses/big hordes (`cam.autoTarget`), fog thins and the shadow frustum widens with distance; zoom saved in `localStorage neon-echo-zoom`.
+
 Possible next steps: real-GPU playtest feedback from the user, balance tuning (spawn rate in `Waves.update`, xp curve `xpToNext`), more enemy variety/bosses, stripping `Level.build()`.
 
 ## Personalisation (Anass's game)
@@ -60,7 +63,7 @@ GitHub Pages via `.github/workflows/deploy.yml` (build + deploy on every push to
 **Controls (no pointer lock; custom DOM reticle, hide system cursor over canvas):**
 WASD/ZQSD move (use `event.code`, labels via `input.label(code)` → AZERTY-aware) · mouse aim on the ground plane · LMB hold = Pulse Blaster (option: auto-fire) · SPACE or SHIFT = dash (i-frames; being hit during a dash = *Perfect Dodge*: 0.45s slow-mo + sync) · RMB = Blade (arc in aim dir, high dmg, knockback, ignores shields, deflects orange orbs) · **Y** toggles auto-blade (swings at the nearest drone/boss/orange orb in reach, `Game.bladeTarget`; user asked for it, like T for auto-fire; `localStorage neon-echo-autoblade`, AUTO badge on the blade icon) · Q (KeyQ, "A" on AZERTY) = Overclock (when SYNC 100: 6s, world ×0.35 speed, courier dmg ×1.5) · Esc/P pause · mouse wheel zoom.
 
-**Camera:** perspective FOV 50, pitch ~40°, distance ~25 (wheel 18–34), yaw fixed looking north (-Z), small look-ahead toward the cursor, smooth follow, trauma shake. Scenery tall only in the north so it frames the top of the screen.
+**Camera:** perspective FOV 50, pitch 44–66° (tilts with zoom), distance 24 default (wheel 12–64), yaw fixed looking north (-Z), small look-ahead toward the cursor, smooth follow, trauma shake. Scenery tall only in the north so it frames the top of the screen.
 
 **Arena events timeline (10:00 run):**
 2:00 meteor rain (25s, telegraphed circles, hurts enemies too) · 3:00 HIVE MOTHER · 5:00 outer ring collapses (38→27) · 6:30 LANCER · 7:00 meteor rain · 8:00 blackout (25s, fog up, lights flicker) · 10:00 THE WARDEN (at <45% HP middle ring collapses 27→16). Kill Warden → victory screen with "CONTINUE (ENDLESS)" (bosses cycle every ~2.5min with growing HP).

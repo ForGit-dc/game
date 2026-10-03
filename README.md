@@ -25,7 +25,8 @@ To build a static version, run `npm run build`, which outputs to `dist/`. Serve 
 | Space / Shift | Dash (invulnerable). Getting hit mid-dash triggers a *Perfect Dodge* with slow motion |
 | Right mouse / F | Blade: cleaves, breaks Bulwark shields and **deflects orange orbs** back |
 | Q (A on AZERTY) | Overclock when SYNC is full: time slows and damage is ×1.5 |
-| Mouse wheel | Zoom |
+| E | **DEPLOY** — orbital strike where you aim (20 s cooldown) |
+| Mouse wheel / Numpad + − | Zoom (wide zoom-out available) |
 | Esc / P | Pause (volume, ambience, auto-fire, current build) |
 
 ## How a run works
