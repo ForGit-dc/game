@@ -33,6 +33,9 @@ Audio: user said the first storm sounded "fake et agaçant" → rewritten as **p
 - **10 weapons**: the 6 originals + `boomerang` BACKPROP (discs out-and-back → GRADIENT DESCENT, +SERVERLESS), `attention` ATTENTION HEAD (focus beam that ramps on the strongest target → MULTI-HEAD ATTENTION, +BENCHMARK), `kmeans` K-MEANS SINGULARITY (black-hole centroids pull then collapse → HIERARCHICAL COLLAPSE, +DATA PIPELINE; Lattice unlock), `gan` GAN DECOY (holographic double that taunts drones via `game.taunts`, shoots, detonates → ADVERSARIAL PAIR, +new passive `reg` REGULARIZATION −6% damage taken; Lattice unlock).
 - **Lattice: 21 nodes**, up to 10 ranks, escalating costs (`costs()` in `Meta.js`). New: FIREWALL (armor), PRECISION (crit), BLADE MASTERY, SYNC BOOSTER, SHARD MINER, HEAD START (free level-ups at run start), revive rank 2, dash rank 2, unlocks for K-Means and GAN. New stats live in `BASE_STATS` (`armorMul`, `bladeMul`, `bladeReach`, `syncMul`).
 
+- **DATA INGESTION** passive `ingest` (8 ranks, `INGEST_RANGE` in `Weapons.js`): kills within N m of the player drop shards with `pull` set (fly straight to you); rank 8 = every kill anywhere (`Game.ingests`, `Loot.xp(x,z,v,pull)`). Cards use `PASSIVES[id].descFor(level)`.
+- **Endless squeeze**: after 20 s of Endless the barrier closes at 0.075 m/s down to `ENDLESS_MIN_RADIUS` = 11 (`Waves.update` → `Arena.shrinkTo`); rings break away as the barrier passes them; HUD shows the ring width.
+
 Possible next steps: real-GPU playtest feedback from the user, balance tuning (spawn rate in `Waves.update`, xp curve `xpToNext`), more enemy variety/bosses, stripping `Level.build()`.
 
 ## Personalisation (Anass's game)

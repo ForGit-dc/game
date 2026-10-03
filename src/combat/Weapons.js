@@ -57,6 +57,9 @@ export const WEAPONS = {
   },
 };
 
+/** DATA INGESTION reach per rank (metres); rank 8 is unlimited. */
+export const INGEST_RANGE = [6, 9, 12, 16, 21, 27, 35, Infinity];
+
 export const PASSIVES = {
   coils: { id: 'coils', name: 'CUDA CORES', glyph: 'Ψ', color: '#ffd36b', desc: '+12% damage.' },
   cycler: { id: 'cycler', name: 'TERRAFORM', glyph: '≡', color: '#7ff6ff', desc: '-8% cooldowns, +8% fire rate.' },
@@ -68,6 +71,11 @@ export const PASSIVES = {
   phase: { id: 'phase', name: 'SERVERLESS', glyph: '↯', color: '#4d9dff', desc: '-10% dash cooldown, extra charges at ranks 1, 3, 5.' },
   echo: { id: 'echo', name: 'BENCHMARK', glyph: '◈', color: '#a6fffb', desc: '+12% XP, +1s overclock.' },
   reg: { id: 'reg', name: 'REGULARIZATION', glyph: '▣', color: '#ffe066', desc: '-6% damage taken.' },
+  ingest: {
+    id: 'ingest', name: 'DATA INGESTION', glyph: '⇶', color: '#5cffe1',
+    desc: 'Kills near you send their data straight to you.',
+    descFor: (lvl) => (lvl >= 8 ? 'Every kill, anywhere on the Ring, sends its data straight to you.' : `Kills within ${INGEST_RANGE[lvl - 1]} m send their data straight to you.`),
+  },
 };
 
 const _v = new THREE.Vector3();

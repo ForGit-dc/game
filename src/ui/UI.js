@@ -244,6 +244,7 @@ export class UI {
     let evText = '';
     if (ev && !this.boss) evText = ev.active ? `⚠ ${ev.label} · ${Math.ceil(ev.left)}s` : ev.left < 60 ? `${ev.boss ? '☠ ' : ''}${ev.label} IN ${Math.ceil(ev.left)}s` : '';
     if (g.waves.endless && !ev) evText = 'ENDLESS';
+    if (g.waves.endless && !this.boss && (!ev || ev.left >= 60)) evText = g.waves.shrinking ? `◎ RING CLOSING · ${Math.round(g.arena.boundary * 2)} m WIDE` : g.waves.shrinkAnnounced ? `◎ RING AT MINIMUM · ${Math.round(g.arena.boundary * 2)} m` : evText;
     this.set('ev', el.nextEv, 'text', evText);
 
     if (this.boss) {

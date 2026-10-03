@@ -60,7 +60,8 @@ export class Loot {
     this.items.length = 0;
   }
 
-  xp(x, z, value) {
+  /** Drop a data shard. `pull` sends it straight to the player (DATA INGESTION). */
+  xp(x, z, value, pull = false) {
     if (this.n >= CAP) {
       // merge into a random existing shard instead of dropping
       const i = Math.floor(Math.random() * this.n);
@@ -73,7 +74,7 @@ export class Loot {
     this.x[i] = x; this.z[i] = z; this.y[i] = 0.8;
     this.vx[i] = Math.cos(a) * sp; this.vz[i] = Math.sin(a) * sp;
     this.v[i] = value;
-    this.pull[i] = 0;
+    this.pull[i] = pull ? 1 : 0;
     this.age[i] = 0;
   }
 

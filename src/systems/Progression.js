@@ -152,14 +152,14 @@ export class Progression {
     for (const [id, lvl] of this.passives) {
       if (lvl < MAX_LEVEL) {
         const def = PASSIVES[id];
-        pool.push({ kind: 'passive', id, weight: 2.5, title: def.name, glyph: def.glyph, color: def.color, desc: def.desc, tag: `LV ${lvl + 1}`, level: lvl + 1 });
+        pool.push({ kind: 'passive', id, weight: 2.5, title: def.name, glyph: def.glyph, color: def.color, desc: def.descFor ? def.descFor(lvl + 1) : def.desc, tag: `LV ${lvl + 1}`, level: lvl + 1 });
       }
     }
     if (this.passives.size < MAX_PASSIVES) {
       for (const def of Object.values(PASSIVES)) {
         if (this.passives.has(def.id)) continue;
         const evoFor = Object.values(WEAPONS).find((w) => w.evo.with === def.id && this.weapons.has(w.id));
-        pool.push({ kind: 'passive', id: def.id, weight: evoFor ? 2.4 : 1.6, title: def.name, glyph: def.glyph, color: def.color, desc: def.desc, tag: 'NEW PASSIVE', isNew: true, hint: evoFor ? `Evolves ${evoFor.name}` : null });
+        pool.push({ kind: 'passive', id: def.id, weight: evoFor ? 2.4 : 1.6, title: def.name, glyph: def.glyph, color: def.color, desc: def.descFor ? def.descFor(1) : def.desc, tag: 'NEW PASSIVE', isNew: true, hint: evoFor ? `Evolves ${evoFor.name}` : null });
       }
     }
     // chests favour upgrades of what you own

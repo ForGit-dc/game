@@ -17,6 +17,7 @@ import { BOSSES } from '../enemies/Bosses.js';
 import { Progression } from '../systems/Progression.js';
 import { Loot } from '../systems/Loot.js';
 import { Waves, STAGES } from '../systems/Waves.js';
+import { INGEST_RANGE } from '../combat/Weapons.js';
 import { Meta } from '../systems/Meta.js';
 import { AudioEngine } from '../audio/Audio.js';
 import { UI } from '../ui/UI.js';
@@ -787,7 +788,7 @@ export class Game {
     const mul = 1 + Math.min(2, Math.floor(this.combo / 20) * 0.1);
     this.score += e.def.score * (e.elite ? 6 : 1) * mul;
     const xp = Math.max(1, Math.round(e.def.xp * (e.elite ? 10 : 1) * (e.mini ? 0.5 : 1)));
-    if (xp >= 8 || Math.random() < 0.85 || e.mini) this.loot.xp(e.x, e.z, xp);
+    if (xp >= 8 || Math.random() < 0.85 || e.mini) this.loot.xp(e.x, e.z, xp, this.ingests(e.x, e.z));
     this.player.addSync(e.elite ? 12 : 0.9);
     if (e.elite) {
       this.elites++;
@@ -809,6 +810,14 @@ export class Game {
     if (big > 1.2) this.fx.ring(_v2.set(e.x, 0.2, e.z), col, 2.5 * big, 0.35);
     this.audio.kill?.(big);
     this.ui.combo(this.combo);
+  }
+
+  /** DATA INGESTION: does a kill at (x, z) send its shards straight to the player? */
+  ingests(x, z) {
+    const r = this.progression.passives.get('ingest') || 0;
+    if (!r) return false;
+    const N = INGEST_RANGE[Math.min(r, INGEST_RANGE.length) - 1];
+    return N === Infinity || Math.hypot(this.player.pos.x - x, this.player.pos.z - z) <= N;
   }
 
   onBomberExplode(x, z, R) {
@@ -1008,6 +1017,11 @@ export class Game {
     this.ui.log(`${ev.label} OVER`, 'sys');
   }
 
+  onEndlessShrink() {
+    this.ui.banner('ENDLESS', 'THE RING IS CLOSING IN', 'The barrier shrinks until only the core disc is left.', 'warn');
+    this.audio.collapseStart();
+  }
+
   onCollapse(ring) {
     this.audio.collapseStart();
     this.ui.banner('STRUCTURAL FAILURE', 'THE RING IS BREAKING', 'Move toward the centre!', 'red');
@@ -1074,7 +1088,8 @@ export class Game {
     this.bossKills++;
     this.runShards += 50;
     this.score += 5000;
-    for (let i = 0; i < 40; i++) this.loot.xp(x + rand(-3, 3), z + rand(-3, 3), 8);
+    const pull = this.ingests(x, z);
+    for (let i = 0; i < 40; i++) this.loot.xp(x + rand(-3, 3), z + rand(-3, 3), 8, pull);
     this.loot.item('chest', x, z);
     this.loot.item('heart', x + 2, z);
     b.dispose();

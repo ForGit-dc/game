@@ -429,6 +429,21 @@ export class Arena extends Level {
     this.pendingBoundary = { at: warnTime, r: RINGS[stage - 1] - 0.7 };
   }
 
+  /** Endless squeeze: pull the barrier in toward `r` (never outward); rings it passes break away. */
+  shrinkTo(r) {
+    if (r >= this.boundaryTarget) return;
+    this.boundaryTarget = r;
+    if (this.stage >= 2 && r < RINGS[1] + 1) {
+      this.collapseRing(2, 4);
+      return 2;
+    }
+    if (this.stage >= 1 && r < RINGS[0] + 1) {
+      this.collapseRing(1, 4);
+      return 1;
+    }
+    return 0;
+  }
+
   pulse(radius = 0) {
     this.circuitU.uPulse.value = 1;
     this.circuitU.uPulseR.value = radius;
@@ -445,7 +460,7 @@ export class Arena extends Level {
     if (this.pendingBoundary) {
       this.pendingBoundary.at -= dt;
       if (this.pendingBoundary.at <= 0) {
-        this.boundaryTarget = this.pendingBoundary.r;
+        this.boundaryTarget = Math.min(this.boundaryTarget, this.pendingBoundary.r);
         this.pendingBoundary = null;
         this.solidStage = this.stage;
         U.uWarn.value.set(0, 0, 0);

@@ -50,6 +50,11 @@ const ENDLESS = {
   events: [],
 };
 
+/** Endless: the barrier starts closing after a grace period and stops at this radius. */
+export const ENDLESS_MIN_RADIUS = 11;
+const ENDLESS_SHRINK_DELAY = 20;
+const ENDLESS_SHRINK_RATE = 0.075; // metres per second
+
 const BOSS_LABEL = { hive: 'THE HALLUCINATION', lancer: 'OVERFIT', warden: 'THE BLACK BOX' };
 
 /** Spawn director: escalating hordes, elites, surges and each stage's scripted timeline. */
@@ -98,6 +103,9 @@ export class Waves {
     this.endless = true;
     this.loop++;
     this.startStage(STAGES.length);
+    this.endlessStartR = this.game.arena.boundary;
+    this.shrinkAnnounced = false;
+    this.shrinking = false;
     const bosses = ['hive', 'lancer', 'warden'];
     for (let k = 0; k < 14; k++) {
       const at = 45 + k * 75;
@@ -163,6 +171,19 @@ export class Waves {
         if (a.type === 'blackout') g.setBlackout(false);
         g.onEventEnd(a);
       }
+    }
+
+    // endless: the Ring tightens until only a small disc is left
+    if (this.endless && this.stageT > ENDLESS_SHRINK_DELAY) {
+      const a = g.arena;
+      const target = Math.max(ENDLESS_MIN_RADIUS, this.endlessStartR - (this.stageT - ENDLESS_SHRINK_DELAY) * ENDLESS_SHRINK_RATE);
+      if (!this.shrinkAnnounced) {
+        this.shrinkAnnounced = true;
+        g.onEndlessShrink();
+      }
+      const fell = a.shrinkTo(target);
+      if (fell) g.onCollapse(fell);
+      this.shrinking = target > ENDLESS_MIN_RADIUS;
     }
 
     const bossActive = g.bosses.length > 0;
